@@ -1,6 +1,6 @@
 import { Request, Response  } from "express";
 import { sendSuccess, sendError } from "../../utils/respon.handler";
-import { createProductServices, getAllProductServices, getProductByCategoryServices, getProductByIdServices } from "../../services/product/productServices";
+import { createProductServices, deleteProductServices, getAllProductServices, getProductByCategoryServices, getProductByIdServices } from "../../services/product/productServices";
 
 export const createProductControllers = async (req: Request, res: Response) => {
   try {
@@ -63,6 +63,27 @@ export const getProductByCategoryControllers = async(req: Request, res: Response
      return sendSuccess(res, 200, "Products fetched successfully", products);
   } catch (error: any) {
     console.error("GetProductById Error:", error.message);
+    return sendError(res, error.statusCode || 400, error.message);
+  }
+}
+
+export const deleteProductControllers = async(req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return sendError(
+        res, 400, "Category Id is required"
+      );
+    }
+
+    const productId = parseInt(id, 10);
+    await deleteProductServices(productId)
+    return sendSuccess(
+      res, 200, "Product deleted successfully"
+    );
+  } catch (error: any) {
+    console.error("DeleteCategory Error:", error.message);
     return sendError(res, error.statusCode || 400, error.message);
   }
 }

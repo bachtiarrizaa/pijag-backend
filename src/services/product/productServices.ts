@@ -97,3 +97,21 @@ export const getProductByCategoryServices = async(categoryName: string) => {
 
   return product;
 }
+
+export const deleteProductServices = async(productId: number) => {
+  const product = await prisma.product.findUnique({
+    where: { id: productId }
+  });
+
+  if (!product) {
+    const error: any = new Error("Category not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const deleteProduct = await prisma.product.delete({
+    where: { id: productId }
+  });
+
+  return deleteProduct;
+}

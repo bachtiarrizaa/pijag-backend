@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { sendSuccess, sendError } from "../../utils/respon.handler";
-import { createCategoryServices, getAllCategoriesServices, getCategoryByIdServices, updateCategoryServices } from "../../services/category/categoryServices";
+import { createCategoryServices, deleteCategoryServices, getAllCategoriesServices, getCategoryByIdServices, updateCategoryServices } from "../../services/category/categoryServices";
 
 export const createCategoryControllers = async (req: Request, res: Response) => {
   try {
@@ -75,8 +75,9 @@ export const deleteCategoryController = async(req: Request, res: Response) => {
       );
     }
     const categoryId = parseInt(id, 10)
+    await deleteCategoryServices(categoryId);
     return sendSuccess(
-      res, 200, "Category deleted successfully", categoryId
+      res, 200, "Category deleted successfully"
     );
   } catch (error: any) {
     console.error("DeleteCategory Error:", error.message);
