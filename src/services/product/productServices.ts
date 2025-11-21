@@ -53,3 +53,47 @@ export const createProductServices = async (data: CreateProduct) => {
 
   return createProduct;
 };
+
+export const getAllProductServices = async() => {
+  const getAllProduct = await prisma.product.findMany({
+    orderBy: {
+      created_at: "desc"
+    }
+  });
+
+  return getAllProduct;
+}
+
+export const getProductByIdServices = async(productId: number) => {
+  const getProductById = await prisma.product.findUnique({
+    where: { id: productId }
+  });
+
+  if (!getProductById) {
+    const error: any = new Error("Product not found");
+    error.statusCode = 404;
+    throw error;
+  }
+  return getProductById;
+}
+
+export const getProductByCategoryServices = async(categoryName: string) => {
+  const category = await prisma.category.findFirst({
+    where: { name: categoryName }
+  });
+
+  if (!category) {
+    const error: any = new Error("Category not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const product = await prisma.product.findMany({
+    where: { category_id: category.id },
+    // include: {
+    //   category: true,
+    // },
+  });
+
+  return product;
+}
