@@ -49,7 +49,7 @@ export const getCategoryByIdControllers = async (req: Request, res: Response) =>
 export const updatedCategoryControllers = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const reqBody  = req.body;
 
     if (!id) {
       return sendError(
@@ -58,7 +58,7 @@ export const updatedCategoryControllers = async (req: Request, res: Response) =>
     }
 
     const categoryId = parseInt(id, 10);
-    const updatedCategory = await updateCategoryServices(categoryId, req.body);
+    const updatedCategory = await updateCategoryServices(categoryId, reqBody);
     return sendSuccess(res, 200, "Category updated successfully", updatedCategory);
   } catch (error: any) {
     console.error("UpdateCategory Error:", error.message);

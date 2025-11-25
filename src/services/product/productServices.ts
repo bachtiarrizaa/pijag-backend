@@ -1,5 +1,5 @@
 import prisma from "../../config/prisma.config";
-import { CreateProduct } from "../../types/prodiuct/product";
+import { CreateProduct, UpdateProduct } from "../../types/prodiuct/product";
 
 export const createProductServices = async (data: CreateProduct) => {
   const {
@@ -11,10 +11,6 @@ export const createProductServices = async (data: CreateProduct) => {
     image
   } = data;
 
-  const parsedCategoryId = Number(category_id);
-  // const parsedPrice = Number(price);
-  const parsedStock = Number(stock);
-
   if ( category_id == null || !name || !description || price == null || stock == null || !image ) {
     const error: any = new Error("All fields are required");
     error.statusCode = 400;
@@ -24,6 +20,16 @@ export const createProductServices = async (data: CreateProduct) => {
   if (name.trim() === "") {
     const error: any = new Error("Name cannot be empty");
     error.statusCode = 400;
+    throw error;
+  }
+
+  const categoryExist = await prisma.category.findUnique({
+    where: { id: Number(category_id) }
+  });
+
+  if (!categoryExist) {
+    const error: any = new Error("Category not found");
+    error.statusCode = 404;
     throw error;
   }
 
@@ -39,11 +45,11 @@ export const createProductServices = async (data: CreateProduct) => {
 
   const createProduct = await prisma.product.create({
     data: {
-      category_id: parsedCategoryId,
+      category_id: Number(category_id),
       name,
       description,
       price,
-      stock: parsedStock,
+      stock: Number(stock),
       image,
     },
     include: {
@@ -78,16 +84,16 @@ export const getProductByIdServices = async(productId: number) => {
 }
 
 export const getProductByCategoryServices = async(categoryName: string) => {
-  const normalizedInput = categoryName.replace(/\=/g, "").toLocaleLowerCase();
+  const normalizedInput = categoryName.replace(/\s+/g, "").toLocaleLowerCase();
 
   const categories = await prisma.category.findMany();
 
-  const macthedCategory = categories.find((c) => {
+  const matchedCategory = categories.find((c) => {
     const normalizedDBName = c.name.replace(/\s+/g, "").toLocaleLowerCase();
     return normalizedDBName === normalizedInput;
   });
 
-  if (!macthedCategory) {
+  if (!matchedCategory) {
     const error: any = new Error("Category not found");
     error.statusCode = 404;
     throw error;
@@ -95,11 +101,67 @@ export const getProductByCategoryServices = async(categoryName: string) => {
 
   const products = await prisma.product.findMany({
     where: {
-      category_id: macthedCategory.id
+      category_id: matchedCategory.id
     }
   })
 
   return products;
+}
+
+export const updatedProductServices = async(productId: number, data: UpdateProduct ) => {
+  const { category_id, name, description, price, stock, image } = data;
+
+  const product = await prisma.product.findUnique({
+    where: { id: productId }
+  });
+
+  if (!product) {
+    const error: any = new Error("Product not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (name && name.trim() !== "") {
+    const existing  = await prisma.product.findFirst({
+      where: {
+        name,
+        NOT: { id: productId }
+      }
+    });
+    if (existing) {
+      const error: any = new Error("Product already exists");
+      error.statusCode = 409;
+      throw error;
+    }
+  }
+
+  const updatedData: any = {};
+
+  if (category_id !== undefined) {
+    updatedData.category_id = Number(category_id);
+  }
+  if (name !== undefined && name.trim() !== "") {
+    updatedData.name = name;
+  }
+  if (description !== undefined) {
+    updatedData.description = description;
+  }
+  if (price !== undefined) {
+    updatedData.price = Number(price);
+  }
+  if (stock !== undefined) {
+    updatedData.stock = Number(stock);
+  }
+  if (image !== undefined) {
+    updatedData.image = image;
+  }
+
+  const updatedProduct = await prisma.product.update({
+    where: { id: productId },
+    data: updatedData,
+  });
+
+  return updatedProduct;
 }
 
 export const deleteProductServices = async(productId: number) => {
@@ -108,7 +170,7 @@ export const deleteProductServices = async(productId: number) => {
   });
 
   if (!product) {
-    const error: any = new Error("Category not found");
+    const error: any = new Error("Product not found");
     error.statusCode = 404;
     throw error;
   }

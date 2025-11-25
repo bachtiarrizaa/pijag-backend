@@ -3,6 +3,8 @@ export interface CreateProduct {
   name: string;
   description: string;
   price: string;
-  stock: number;
+  stock: string;
   image: string;
 }
+
+export type UpdateProduct = Partial<CreateProduct>
