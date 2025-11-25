@@ -78,24 +78,28 @@ export const getProductByIdServices = async(productId: number) => {
 }
 
 export const getProductByCategoryServices = async(categoryName: string) => {
-  const category = await prisma.category.findFirst({
-    where: { name: categoryName }
+  const normalizedInput = categoryName.replace(/\=/g, "").toLocaleLowerCase();
+
+  const categories = await prisma.category.findMany();
+
+  const macthedCategory = categories.find((c) => {
+    const normalizedDBName = c.name.replace(/\s+/g, "").toLocaleLowerCase();
+    return normalizedDBName === normalizedInput;
   });
 
-  if (!category) {
+  if (!macthedCategory) {
     const error: any = new Error("Category not found");
     error.statusCode = 404;
     throw error;
   }
 
-  const product = await prisma.product.findMany({
-    where: { category_id: category.id },
-    // include: {
-    //   category: true,
-    // },
-  });
+  const products = await prisma.product.findMany({
+    where: {
+      category_id: macthedCategory.id
+    }
+  })
 
-  return product;
+  return products;
 }
 
 export const deleteProductServices = async(productId: number) => {
