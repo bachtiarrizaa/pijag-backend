@@ -1,7 +1,7 @@
 import prisma from "../../config/prisma.config";
 import { CreateProduct, UpdateProduct } from "../../types/prodiuct/product";
 
-export const createProductServices = async (data: CreateProduct) => {
+export const createProductService = async (data: CreateProduct) => {
   const {
     category_id,
     name,
@@ -60,7 +60,7 @@ export const createProductServices = async (data: CreateProduct) => {
   return createProduct;
 };
 
-export const getAllProductServices = async() => {
+export const getAllProductService = async() => {
   const getAllProduct = await prisma.product.findMany({
     orderBy: {
       created_at: "desc"
@@ -70,7 +70,7 @@ export const getAllProductServices = async() => {
   return getAllProduct;
 }
 
-export const getProductByIdServices = async(productId: number) => {
+export const getProductByIdService = async(productId: number) => {
   const getProductById = await prisma.product.findUnique({
     where: { id: productId }
   });
@@ -83,7 +83,7 @@ export const getProductByIdServices = async(productId: number) => {
   return getProductById;
 }
 
-export const getProductByCategoryServices = async(categoryName: string) => {
+export const getProductByCategoryService = async(categoryName: string) => {
   const normalizedInput = categoryName.replace(/\s+/g, "").toLocaleLowerCase();
 
   const categories = await prisma.category.findMany();
@@ -108,7 +108,7 @@ export const getProductByCategoryServices = async(categoryName: string) => {
   return products;
 }
 
-export const updatedProductServices = async(productId: number, data: UpdateProduct ) => {
+export const updatedProductService = async(productId: number, data: UpdateProduct ) => {
   const { category_id, name, description, price, stock, image } = data;
 
   const product = await prisma.product.findUnique({
@@ -164,7 +164,7 @@ export const updatedProductServices = async(productId: number, data: UpdateProdu
   return updatedProduct;
 }
 
-export const deleteProductServices = async(productId: number) => {
+export const deleteProductService = async(productId: number) => {
   const product = await prisma.product.findUnique({
     where: { id: productId }
   });

@@ -1,9 +1,16 @@
 import { Request, Response  } from "express";
 import { sendSuccess, sendError } from "../../utils/respon.handler";
-import { createProductServices, deleteProductServices, getAllProductServices, getProductByCategoryServices, getProductByIdServices, updatedProductServices } from "../../services/product/productServices";
+import {
+  createProductService,
+  deleteProductService,
+  getAllProductService,
+  getProductByCategoryService,
+  getProductByIdService,
+  updatedProductService
+} from "../../services/product/product.service";
 import { UpdateProduct } from "../../types/prodiuct/product";
 
-export const createProductControllers = async (req: Request, res: Response) => {
+export const createProductController = async (req: Request, res: Response) => {
   try {
     const reqBody = req.body;
 
@@ -11,7 +18,7 @@ export const createProductControllers = async (req: Request, res: Response) => {
       reqBody.image = req.file.filename
     }
 
-    const createProduct = await createProductServices(reqBody);
+    const createProduct = await createProductService(reqBody);
     return sendSuccess(
       res, 201, "Product created successfully",
       createProduct
@@ -22,9 +29,9 @@ export const createProductControllers = async (req: Request, res: Response) => {
   }
 }
 
-export const getAllProductControllers = async(req: Request, res: Response) => {
+export const getAllProductController = async(req: Request, res: Response) => {
   try {
-    const allProducts = await getAllProductServices();
+    const allProducts = await getAllProductService();
     return sendSuccess(
       res, 200, "All product fetched successfully",
       allProducts
@@ -35,7 +42,7 @@ export const getAllProductControllers = async(req: Request, res: Response) => {
   }
 }
 
-export const getProductByIdControllers = async(req: Request, res: Response) => {
+export const getProductByIdController = async(req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if(!id) {
@@ -43,7 +50,7 @@ export const getProductByIdControllers = async(req: Request, res: Response) => {
     }
     const productId = parseInt(id, 10);
 
-    const getProductById = await getProductByIdServices(productId);
+    const getProductById = await getProductByIdService(productId);
     return sendSuccess(
       res, 200, "Product fetched successfully",
       getProductById
@@ -54,13 +61,13 @@ export const getProductByIdControllers = async(req: Request, res: Response) => {
   }
 }
 
-export const getProductByCategoryControllers = async(req: Request, res: Response) => {
+export const getProductByCategoryController = async(req: Request, res: Response) => {
   try {
     const { name }= req.query;
     if (typeof name !== "string") {
       return sendError(res, 400, "Query param 'name' is required");
     }
-    const products = await getProductByCategoryServices(name);
+    const products = await getProductByCategoryService(name);
      return sendSuccess(res, 200, "Products fetched successfully", products);
   } catch (error: any) {
     console.error("GetProductById Error:", error.message);
@@ -68,7 +75,7 @@ export const getProductByCategoryControllers = async(req: Request, res: Response
   }
 }
 
-export const updatedProductControllers = async(req: Request, res: Response) => {
+export const updatedProductController = async(req: Request, res: Response) => {
   try {
 
     const { id } = req.params;
@@ -87,7 +94,7 @@ export const updatedProductControllers = async(req: Request, res: Response) => {
       reqBody.image = req.file.filename;
     }
 
-    const updatedProduct = await updatedProductServices(productId, reqBody);
+    const updatedProduct = await updatedProductService(productId, reqBody);
     return sendSuccess(res, 200, "Product updated successfully", updatedProduct);
   } catch (error: any) {
     console.error("UpdatedProduct Error:", error.message);
@@ -95,7 +102,7 @@ export const updatedProductControllers = async(req: Request, res: Response) => {
   }
 }
 
-export const deleteProductControllers = async(req: Request, res: Response) => {
+export const deleteProductController = async(req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -106,7 +113,7 @@ export const deleteProductControllers = async(req: Request, res: Response) => {
     }
 
     const productId = parseInt(id, 10);
-    await deleteProductServices(productId)
+    await deleteProductService(productId)
     return sendSuccess(
       res, 200, "Product deleted successfully"
     );
