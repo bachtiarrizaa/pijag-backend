@@ -7,10 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// ==========================
-/// ENUMS
-/// ==========================
-
 enum OrderStatus {
   pending
   processing
@@ -56,10 +52,6 @@ enum DiscountType {
   percent
   fixed
 }
-
-/// ==========================
-/// TABLES
-/// ==========================
 
 model BlacklistToken {
   id         Int      @id @default(autoincrement())
@@ -302,10 +294,6 @@ model Review {
   @@index([customer_id])
   @@index([product_id])
 }
-
-/// ==========================
-/// DISCOUNT SYSTEM (SINGLE MODEL)
-/// ==========================
 
 model Discount {
   id            Int           @id @default(autoincrement())
