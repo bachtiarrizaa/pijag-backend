@@ -1,7 +1,7 @@
 import prisma from "../../config/prisma.config";
 import { Category } from "../../types/category/category";
 
-export const createCategoryServices = async (data: Category) => {
+export const createCategoryService = async (data: Category) => {
   const { name } = data;
 
   const existingCategory = await prisma.category.findFirst({
@@ -29,7 +29,7 @@ export const createCategoryServices = async (data: Category) => {
   return createCategory;
 }
 
-export const getAllCategoriesServices = async () => {
+export const getAllCategoriesService = async () => {
   const allCategories = await prisma.category.findMany({
     orderBy: {
       created_at: "desc"
@@ -39,7 +39,7 @@ export const getAllCategoriesServices = async () => {
   return allCategories;
 }
 
-export const getCategoryByIdServices = async(categoryId: number) => {
+export const getCategoryByIdService = async(categoryId: number) => {
   const getCategoryById = await prisma.category.findUnique({
     where: { id: categoryId},
   });
@@ -53,7 +53,7 @@ export const getCategoryByIdServices = async(categoryId: number) => {
   return getCategoryById;
 }
 
-export const updateCategoryServices = async (categoryId: number, data: Category) => {
+export const updateCategoryService = async (categoryId: number, data: Category) => {
   const { name } = data;
   const category = await prisma.category.findUnique({
     where: { id: categoryId }
@@ -98,7 +98,7 @@ export const updateCategoryServices = async (categoryId: number, data: Category)
   return updatedCategory;
 }
 
-export const deleteCategoryServices = async (categoryId: number) => {
+export const deleteCategoryService = async (categoryId: number) => {
   const category = await prisma.category.findUnique({
     where: { id: categoryId }
   });

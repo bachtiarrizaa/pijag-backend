@@ -1,11 +1,17 @@
 import { Request, Response } from "express";
 import { sendSuccess, sendError } from "../../utils/respon.handler";
-import { createCategoryServices, deleteCategoryServices, getAllCategoriesServices, getCategoryByIdServices, updateCategoryServices } from "../../services/category/categoryServices";
+import {
+  createCategoryService,
+  deleteCategoryService,
+  getAllCategoriesService,
+  getCategoryByIdService,
+  updateCategoryService
+} from "../../services/category/category.service";
 
-export const createCategoryControllers = async (req: Request, res: Response) => {
+export const createCategoryController = async (req: Request, res: Response) => {
   try {
     const name = req.body;
-    const createCategory = await createCategoryServices(name);
+    const createCategory = await createCategoryService(name);
     return sendSuccess(
       res, 201, "Category created successfully",
       createCategory
@@ -16,9 +22,9 @@ export const createCategoryControllers = async (req: Request, res: Response) => 
   }
 }
 
-export const getAllCategoriesControllers = async (req: Request, res: Response) => {
+export const getAllCategoriesController = async (req: Request, res: Response) => {
   try {
-    const allCategories = await getAllCategoriesServices();
+    const allCategories = await getAllCategoriesService();
     return sendSuccess(res, 200, "All categories fetched successfully", allCategories);
   } catch (error:any) {
     console.error("GetAllCategories error:", error.message);
@@ -26,7 +32,7 @@ export const getAllCategoriesControllers = async (req: Request, res: Response) =
   }
 }
 
-export const getCategoryByIdControllers = async (req: Request, res: Response) => {
+export const getCategoryByIdController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -38,7 +44,7 @@ export const getCategoryByIdControllers = async (req: Request, res: Response) =>
 
     const categoryId = parseInt(id, 10);
 
-    const getCategoryById = await getCategoryByIdServices(categoryId)
+    const getCategoryById = await getCategoryByIdService(categoryId)
     return sendSuccess(res, 200, "Category fetched successfully", getCategoryById);
   } catch (error: any) {
     console.error("GetCategoryByIdController Error:", error.message);
@@ -46,7 +52,7 @@ export const getCategoryByIdControllers = async (req: Request, res: Response) =>
   }
 }
 
-export const updatedCategoryControllers = async (req: Request, res: Response) => {
+export const updatedCategoryController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const reqBody  = req.body;
@@ -58,7 +64,7 @@ export const updatedCategoryControllers = async (req: Request, res: Response) =>
     }
 
     const categoryId = parseInt(id, 10);
-    const updatedCategory = await updateCategoryServices(categoryId, reqBody);
+    const updatedCategory = await updateCategoryService(categoryId, reqBody);
     return sendSuccess(res, 200, "Category updated successfully", updatedCategory);
   } catch (error: any) {
     console.error("UpdateCategory Error:", error.message);
@@ -75,7 +81,7 @@ export const deleteCategoryController = async(req: Request, res: Response) => {
       );
     }
     const categoryId = parseInt(id, 10)
-    await deleteCategoryServices(categoryId);
+    await deleteCategoryService(categoryId);
     return sendSuccess(
       res, 200, "Category deleted successfully"
     );
