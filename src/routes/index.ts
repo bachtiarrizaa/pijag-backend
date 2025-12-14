@@ -1,5 +1,5 @@
 import { Router } from "express";
-import authRoutes from "./authRoutes";
+import authRoutes from "./auth.routes";
 import categoryRoutes from "./categoryRoutes";
 import productRoutes from "./productRoutes";
 import cartRoutes from './cartRoutes';

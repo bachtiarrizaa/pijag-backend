@@ -1,8 +1,8 @@
 import bcrypt from "bcrypt";
 import prisma from "../../config/prisma.config";
-import { Auth } from "../../types/auth/auth";
+import { Register } from "../../types/auth/auth";
 
-export const registerServices = async (data:Auth) => {
+export const registerService = async (data:Register) => {
   const { name, username, email, password } = data;
 
   const existingUsername = await prisma.user.findUnique({
@@ -25,7 +25,7 @@ export const registerServices = async (data:Auth) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const defaultRole = 2;
+  const defaultRole = 3;
 
   const user = await prisma.user.create({
     data: {

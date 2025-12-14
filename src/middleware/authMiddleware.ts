@@ -1,9 +1,8 @@
 import { Response, Request, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import prisma from "../config/prisma.config";
-import { appConfig } from "../config/app.config";
-import { JwtPayload } from "jsonwebtoken";
 import { sendError } from "../utils/respon.handler";
+import { verifyAccessToken } from "../utils/jwt.util";
 
 export const authenticateToken = async (
   req: Request,
@@ -27,7 +26,7 @@ export const authenticateToken = async (
       return sendError(res, 401, "Token has been revoked");
     }
 
-    const decoded = jwt.verify(token, appConfig.JWTSECRET as jwt.Secret) as JwtPayload;
+    const decoded = verifyAccessToken(token);
     req.user = decoded;
 
     next();

@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import prisma from "../../config/prisma.config";
 import { appConfig } from "../../config/app.config";
+import { verifyAccessToken } from "../../utils/jwt.util";
 
 export const logoutService = async (token: string) => {
   try {
@@ -13,12 +14,19 @@ export const logoutService = async (token: string) => {
       throw error;
     }
 
-    const decoded = jwt.verify(token, appConfig.JWTSECRET as jwt.Secret) as any;
+    let decoded;
+    try {
+      decoded = verifyAccessToken(token);
+    } catch {
+      const error: any = new Error("Invalid or expired token");
+      error.statusCode = 409;
+      throw error;
+    }
 
     await prisma.blacklistToken.create({
       data: {
         token,
-        expired_at: new Date(decoded.exp * 1000),
+        expired_at: new Date(decoded.exp! * 1000),
       },
     });
   } catch (error: any) {
