@@ -1,7 +1,7 @@
 import prisma from "../../config/prisma.config";
 import { Shift } from "../../types/shift/shift";
 
-export const startShiftServices = async (userId: number, data: Shift) => {
+export const startShiftService = async (userId: number, data: Shift) => {
   const { cash_start, notes } = data;
 
   const activeShift = await prisma.shift.findFirst({
@@ -32,7 +32,7 @@ export const startShiftServices = async (userId: number, data: Shift) => {
   return newShift;
 }
 
-export const endShiftServices = async (userId: number, data: Shift) => {
+export const endShiftService = async (userId: number, data: Shift) => {
   const { cash_end, notes } = data;
 
   const activeShift = await prisma.shift.findFirst({

@@ -1,12 +1,15 @@
-import { endShiftServices, startShiftServices } from "../../services/shift/shift.services";
+import {
+  endShiftService,
+  startShiftService
+} from "../../services/shift/shift.service";
 import { sendSuccess, sendError } from "../../utils/respon.handler"
 import { Request, Response } from "express"
 
-export const startShiftControllers = async(req: Request, res: Response) => {
+export const startShiftController = async(req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
 
-    const startShift = await startShiftServices(userId, req.body);
+    const startShift = await startShiftService(userId, req.body);
     return sendSuccess(
       res, 201, "Shift started successfully",
       startShift
@@ -17,11 +20,11 @@ export const startShiftControllers = async(req: Request, res: Response) => {
   }
 }
 
-export const endShiftControllers = async(req: Request, res: Response)=> {
+export const endShiftController = async(req: Request, res: Response)=> {
   try {
     const userId = req.user?.id;
 
-    const endShift = await endShiftServices(userId, req.body);
+    const endShift = await endShiftService(userId, req.body);
     return sendSuccess(
       res, 201, "End Shift successfully",
       endShift
