@@ -1,5 +1,6 @@
 import { Router } from "express";
 import authRoutes from "./auth.routes";
+import roleRoutes from "./role.routes";
 import categoryRoutes from "./category.routes";
 import profileRoutes from "./profile.routes";
 import productRoutes from "./product.routes";
@@ -9,6 +10,7 @@ import shiftRoutes from "./shift.routes"
 const router = Router();
 
 router.use("/auth", authRoutes);
+router.use("/role", roleRoutes);
 router.use("/category", categoryRoutes);
 router.use("/profile", profileRoutes);
 router.use("/product", productRoutes)
