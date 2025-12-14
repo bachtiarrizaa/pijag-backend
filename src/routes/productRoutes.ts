@@ -1,7 +1,14 @@
 import { Router } from "express";
-import { createProductControllers, deleteProductControllers, getAllProductControllers, getProductByCategoryControllers, getProductByIdControllers, updatedProductControllers } from "../controllers/product/productControllers";
-import { isAdmin } from "../middleware/authMiddleware";
-import { uploadImgProduct } from "../middleware/uploadImgMiddleware";
+import {
+    createProductControllers,
+    deleteProductControllers,
+    getAllProductControllers,
+    getProductByCategoryControllers,
+    getProductByIdControllers,
+    updatedProductControllers
+} from "../controllers/product/productControllers";
+import { isAdmin } from "../middleware/auth.middleware";
+import { uploadImgProduct } from "../middleware/uploadImg.middleware";
 
 const router = Router();
 

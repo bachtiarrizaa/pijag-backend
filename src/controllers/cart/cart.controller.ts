@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { sendSuccess, sendError } from "../../utils/respon.handler";
-import { addItemToCartService, deleteCartItemServices, getCartServices, updateCartItemServices } from "../../services/cart/cartServices";
+import {
+  addItemToCartService,
+  deleteCartItemService,
+  getCartService,
+  updateCartItemService
+} from "../../services/cart/cart.service";
 import { Cart } from "../../types/cart/cart";
 import prisma from "../../config/prisma.config";
 
@@ -15,7 +20,7 @@ export const getCartControllers = async(req: Request, res: Response) => {
       return sendError(res, 400, "Customer not found");
     }
     console.log("Customer id", customer.id)
-    const getCart = await getCartServices(customer.id);
+    const getCart = await getCartService(customer.id);
     return sendSuccess(
       res, 200, "Cart fetched successfully",
       getCart,
@@ -50,12 +55,12 @@ export const addItemToCartController = async (req: Request, res: Response) => {
   }
 };
 
-export const updateCartItemControllers = async (req: Request, res: Response) => {
+export const updateCartItemController = async (req: Request, res: Response) => {
   try {
     const cartItemId = Number(req.params.id);
 
     const data: Cart = req.body;
-    const updated = await updateCartItemServices(cartItemId, data);
+    const updated = await updateCartItemService(cartItemId, data);
     if ("message" in updated && updated.message === "Item removed from cart"){
       return sendSuccess(res, 200, "Item removed from cart", null);
     }
@@ -66,10 +71,10 @@ export const updateCartItemControllers = async (req: Request, res: Response) => 
   }
 }
 
-export const deleteCartItemControlelr = async (req: Request, res: Response) => {
+export const deleteCartItemController = async (req: Request, res: Response) => {
   try {
     const cartItemId = Number(req.params.id);
-    const deleteItem = await deleteCartItemServices(cartItemId);
+    const deleteItem = await deleteCartItemService(cartItemId);
     return sendSuccess(res, 200, "Cart item delete successfully", deleteItem);
   } catch (error: any) {
     console.error("GetCart Error:", error.message);

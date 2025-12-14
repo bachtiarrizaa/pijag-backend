@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isCashier } from "../middleware/authMiddleware";
+import { isCashier } from "../middleware/auth.middleware";
 import { startShiftControllers, endShiftControllers } from "../controllers/shift/shift.controllers";
 
 const router = Router();

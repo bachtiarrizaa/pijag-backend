@@ -2,7 +2,7 @@ import { Router } from "express";
 import { registerController } from "../controllers/auth/auth.controller";
 import { loginController } from "../controllers/auth/auth.controller";
 import { logoutController } from "../controllers/auth/auth.controller";
-import { authenticateToken } from "../middleware/authMiddleware";
+import { authenticateToken } from "../middleware/auth.middleware";
 const router = Router();
 
 router.post("/register", registerController);

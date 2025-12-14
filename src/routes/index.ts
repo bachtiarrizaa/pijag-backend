@@ -2,7 +2,7 @@ import { Router } from "express";
 import authRoutes from "./auth.routes";
 import categoryRoutes from "./categoryRoutes";
 import productRoutes from "./productRoutes";
-import cartRoutes from './cartRoutes';
+import cartRoutes from './cart.routes';
 import shiftRoutes from "./shift.routes"
 
 const router = Router();

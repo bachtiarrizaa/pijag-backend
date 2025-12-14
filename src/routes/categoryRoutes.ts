@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAdmin } from "../middleware/authMiddleware";
+import { isAdmin } from "../middleware/auth.middleware";
 import { createCategoryControllers, deleteCategoryController, getAllCategoriesControllers, getCategoryByIdControllers, updatedCategoryControllers } from "../controllers/category/categoryControllers";
 
 const router = Router();

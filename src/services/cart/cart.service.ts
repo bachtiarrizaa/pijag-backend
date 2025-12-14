@@ -2,7 +2,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 import prisma from "../../config/prisma.config"
 import { Cart } from "../../types/cart/cart";
 
-export const getCartServices = async(customerId: number) => {
+export const getCartService = async(customerId: number) => {
   const getCart = await prisma.cart.findFirst({
     where: { customer_id: customerId },
     include: {
@@ -113,7 +113,7 @@ export const addItemToCartService = async (customerId: number, data: Cart) => {
   return cartItem;
 };
 
-export const updateCartItemServices = async (cartItemId: number, data: Cart) => {
+export const updateCartItemService = async (cartItemId: number, data: Cart) => {
   const { quantity } = data;
 
   const cartItem = await prisma.cartItem.findUnique({
@@ -185,7 +185,7 @@ export const updateCartItemServices = async (cartItemId: number, data: Cart) => 
   return updateItem;
 }
 
-export const deleteCartItemServices = async (cartItemId: number) => {
+export const deleteCartItemService = async (cartItemId: number) => {
   const cartItem = await prisma.cartItem.findUnique({
     where: { id: cartItemId }
   });
