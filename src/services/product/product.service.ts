@@ -60,14 +60,46 @@ export const createProductService = async (data: CreateProduct) => {
   return createProduct;
 };
 
-export const getAllProductService = async() => {
-  const getAllProduct = await prisma.product.findMany({
-    orderBy: {
-      created_at: "desc"
+// export const getAllProductService = async() => {
+//   const getAllProduct = await prisma.product.findMany({
+//     orderBy: {
+//       created_at: "desc"
+//     }
+//   });
+
+//   return getAllProduct;
+// }
+
+export const getProductsService = async(categoryName?: string) => {
+  let whereClause: any = {};
+
+  if (categoryName) {
+    const normalizedInput = categoryName.replace(/\s+/g, "").toLowerCase();
+
+    const categories = await prisma.category.findMany();
+
+    const matchedCategory = categories.find((c) => {
+      const normalizedDBName = c.name.replace(/\s+/g, "").toLowerCase();
+      return normalizedDBName === normalizedInput;
+    })
+
+    if (!matchedCategory) {
+      const error: any = new Error("Category not found");
+      error.statusCode = 404;
+      throw error;
     }
+
+    whereClause.category_id = matchedCategory.id;
+  }
+
+  const products = await prisma.product.findMany({
+    where: whereClause,
+    orderBy: {
+      created_at: "desc",
+    },
   });
 
-  return getAllProduct;
+  return products;
 }
 
 export const getProductByIdService = async(productId: number) => {
@@ -83,30 +115,30 @@ export const getProductByIdService = async(productId: number) => {
   return getProductById;
 }
 
-export const getProductByCategoryService = async(categoryName: string) => {
-  const normalizedInput = categoryName.replace(/\s+/g, "").toLocaleLowerCase();
+// export const getProductByCategoryService = async(categoryName: string) => {
+//   const normalizedInput = categoryName.replace(/\s+/g, "").toLocaleLowerCase();
 
-  const categories = await prisma.category.findMany();
+//   const categories = await prisma.category.findMany();
 
-  const matchedCategory = categories.find((c) => {
-    const normalizedDBName = c.name.replace(/\s+/g, "").toLocaleLowerCase();
-    return normalizedDBName === normalizedInput;
-  });
+//   const matchedCategory = categories.find((c) => {
+//     const normalizedDBName = c.name.replace(/\s+/g, "").toLocaleLowerCase();
+//     return normalizedDBName === normalizedInput;
+//   });
 
-  if (!matchedCategory) {
-    const error: any = new Error("Category not found");
-    error.statusCode = 404;
-    throw error;
-  }
+//   if (!matchedCategory) {
+//     const error: any = new Error("Category not found");
+//     error.statusCode = 404;
+//     throw error;
+//   }
 
-  const products = await prisma.product.findMany({
-    where: {
-      category_id: matchedCategory.id
-    }
-  })
+//   const products = await prisma.product.findMany({
+//     where: {
+//       category_id: matchedCategory.id
+//     }
+//   })
 
-  return products;
-}
+//   return products;
+// }
 
 export const updatedProductService = async(productId: number, data: UpdateProduct ) => {
   const { category_id, name, description, price, stock, image } = data;

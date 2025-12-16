@@ -1,11 +1,12 @@
-import { Request, Response  } from "express";
+import { NextFunction, Request, Response  } from "express";
 import { sendSuccess, sendError } from "../../utils/respon.handler";
 import {
   createProductService,
   deleteProductService,
-  getAllProductService,
-  getProductByCategoryService,
+  // getAllProductService,
+  // getProductByCategoryService,
   getProductByIdService,
+  getProductsService,
   updatedProductService
 } from "../../services/product/product.service";
 import { UpdateProduct } from "../../types/prodiuct/product";
@@ -29,15 +30,21 @@ export const createProductController = async (req: Request, res: Response) => {
   }
 }
 
-export const getAllProductController = async(req: Request, res: Response) => {
+export const getProductsController = async (req: Request, res: Response) => {
   try {
-    const allProducts = await getAllProductService();
-    return sendSuccess(
-      res, 200, "All product fetched successfully",
-      allProducts
+    const { category } = req.query;
+
+    const products = await getProductsService(
+      category ? String(category) : undefined
     );
+
+    res.status(200).json({
+      success: true,
+      message: "Products fetched successfully",
+      data: products,
+    });
   } catch (error: any) {
-    console.error("GetAllProducts Erro: ", error.message);
+    console.error("GetProductById Error:", error.message);
     return sendError(res, error.statusCode || 400, error.message);
   }
 }
@@ -55,20 +62,6 @@ export const getProductByIdController = async(req: Request, res: Response) => {
       res, 200, "Product fetched successfully",
       getProductById
     );
-  } catch (error: any) {
-    console.error("GetProductById Error:", error.message);
-    return sendError(res, error.statusCode || 400, error.message);
-  }
-}
-
-export const getProductByCategoryController = async(req: Request, res: Response) => {
-  try {
-    const { name }= req.query;
-    if (typeof name !== "string") {
-      return sendError(res, 400, "Query param 'name' is required");
-    }
-    const products = await getProductByCategoryService(name);
-     return sendSuccess(res, 200, "Products fetched successfully", products);
   } catch (error: any) {
     console.error("GetProductById Error:", error.message);
     return sendError(res, error.statusCode || 400, error.message);
