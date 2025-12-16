@@ -5,7 +5,8 @@ import categoryRoutes from "./category.routes";
 import profileRoutes from "./profile.routes";
 import productRoutes from "./product.routes";
 import cartRoutes from './cart.routes';
-import shiftRoutes from "./shift.routes"
+import shiftRoutes from "./shift.routes";
+import orderRoutes from "./order.routes"
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use("/profile", profileRoutes);
 router.use("/product", productRoutes)
 router.use("/cart", cartRoutes);
 router.use("/cashier", shiftRoutes)
+router.use("/order", orderRoutes);
 
 export default router;
