@@ -9,7 +9,7 @@ import {
   getProductsService,
   updatedProductService
 } from "../../services/product/product.service";
-import { UpdateProduct } from "../../types/prodiuct/product";
+import { UpdateProduct } from "../../types/product/product";
 
 export const createProductController = async (req: Request, res: Response) => {
   try {

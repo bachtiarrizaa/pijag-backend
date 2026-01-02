@@ -8,3 +8,8 @@ export interface CreateProduct {
 }
 
 export type UpdateProduct = Partial<CreateProduct>
+
+export interface ProductDiscount {
+  productId: number,
+  discountId: number,
+}
