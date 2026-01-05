@@ -1,19 +1,14 @@
 import Router from "express";
-import {
-  createRoleController,
-  deleteRoleController,
-  getAllRoleController,
-  updateRoleController
-} from "../controllers/role/role.controller";
-import { isAdmin } from "../middleware/auth.middleware";
+import { RoleController } from "../controllers/role.controller";
+import { AuthMiddleware } from "../middleware/auth.middleware";
 
 const router = Router();
 
-router.use(isAdmin);
+router.use(AuthMiddleware.isAdmin);
 
-router.post("/", createRoleController);
-router.get("/", getAllRoleController);
-router.put("/:id", updateRoleController);
-router.delete("/:id", deleteRoleController);
+router.post("/", RoleController.create);
+router.get("/", RoleController.getRoles);
+router.put("/:id", RoleController.update);
+router.delete("/:id", RoleController.delete);
 
 export default router;

@@ -48,7 +48,8 @@ export class AuthMiddleware {
 
         next();
       } catch (error) {
-        throw new ErrorHandler(403, "Unauthorized role");
+        // throw new ErrorHandler(403, "Unauthorized role");
+        next(error);
       }
     };
   };
