@@ -5,7 +5,7 @@ export class CustomerRepository {
     try {
       const customer = await prisma.customer.create({
         data: {
-          user_id: userId,
+          userId: userId,
           points: 0
         },
       });

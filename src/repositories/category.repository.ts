@@ -30,7 +30,7 @@ export class CategoryRepository {
     try {
       const categories = await prisma.category.findMany({
         orderBy: {
-          created_at: "desc"
+          createdAt: "desc"
         },
       });
       return categories;

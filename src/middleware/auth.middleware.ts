@@ -36,12 +36,13 @@ export class AuthMiddleware {
     return (req: Request, res: Response, next: NextFunction): void => {
       try {
         const user = req.user;
+        console.log("User dari request:", user);
 
         if (!user) {
           throw new ErrorHandler(403, "Forbidden: No user data")
         }
 
-        const userRole = user.role_name.toLowerCase();
+        const userRole = user.roleName.toLowerCase();
         if(!allowedRoles.includes(userRole)) {
           throw new ErrorHandler(403, "Forbidden: Access denied")
         }
@@ -55,17 +56,17 @@ export class AuthMiddleware {
   };
 
   static isAdmin = [
-    this.authenticateToken, 
-    this.authorizeRole(["admin"])
+    AuthMiddleware.authenticateToken, 
+    AuthMiddleware.authorizeRole(["admin"])
   ];
 
   static isCashier = [
-    this.authenticateToken, 
-    this.authorizeRole(["cashier"])
+    AuthMiddleware.authenticateToken, 
+    AuthMiddleware.authorizeRole(["cashier"])
   ];
 
   static isCustomer = [
-    this.authenticateToken, 
-    this.authorizeRole(["customer"])
+    AuthMiddleware.authenticateToken, 
+    AuthMiddleware.authorizeRole(["customer"])
   ];
 }

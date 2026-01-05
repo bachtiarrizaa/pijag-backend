@@ -50,7 +50,7 @@ export class AuthService {
         throw new ErrorHandler(404, "User not found");
       };
 
-      if (!user.role_id || !user.role?.name) {
+      if (!user.roleId || !user.role?.name) {
         throw new ErrorHandler(404, "User role is not properly assigned");
       };
 
@@ -64,8 +64,8 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
-        role_id: user.role_id,
-        role_name: user.role?.name
+        roleId: user.roleId,
+        roleName: user.role?.name
       });
 
       return {
@@ -96,7 +96,7 @@ export class AuthService {
       await prisma.blacklistToken.create({
         data: {
           token,
-          expired_at: new Date(decoded.exp! * 1000),
+          expiredAt: new Date(decoded.exp! * 1000),
         },
       });
     } catch (error: any) {

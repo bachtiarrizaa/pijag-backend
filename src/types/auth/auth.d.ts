@@ -3,7 +3,7 @@ export interface Register {
     username: string,
     email: string,
     password: string,
-    role_id: number,
+    roleId: number,
 }
 
 export interface Login {
@@ -15,6 +15,6 @@ export interface AccessTokenSign {
     id: number,
     username: string,
     email: string,
-    role_id: number,
-    role_name: string,
+    roleId: number | null,
+    roleName: string,
 }

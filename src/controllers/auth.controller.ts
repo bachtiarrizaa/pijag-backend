@@ -38,7 +38,7 @@ export class AuthController {
   async logout (req: Request, res: Response) {
     try {
       const authHeader = req.headers.authorization;
-      const token = authHeader && authHeader.split(" ")[1]; // Mengambil string setelah "Bearer"
+      const token = authHeader && authHeader.split(" ")[1];
 
       if (!token) {
         return res.status(401).json({

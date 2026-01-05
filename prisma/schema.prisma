@@ -33,6 +33,7 @@ enum PaymentMethod {
 }
 
 enum PaymentResultStatus {
+  pending
   success
   failed
   refunded
@@ -54,271 +55,294 @@ enum DiscountType {
 }
 
 model BlacklistToken {
-  id         Int      @id @default(autoincrement())
-  token      String   @db.Text
-  expired_at DateTime
-  created_at DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  token     String   @db.Text
+  expiredAt DateTime @map("expired_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("blacklist_tokens")
 }
 
 model Role {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique @db.VarChar(100)
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  users       User[]
+  users     User[]
+
+  @@map("roles")
 }
 
 model User {
-  id            Int        @id @default(autoincrement())
-  avatar        String?    @db.VarChar(255)
-  name          String     @db.VarChar(100)
-  username      String     @unique @db.VarChar(100)
-  email         String     @unique @db.VarChar(100)
-  password      String     @db.VarChar(255)
-  birth_of_date DateTime?  @db.Date
-  phone_number  String?    @db.VarChar(100)
-  created_at    DateTime   @default(now())
-  updated_at    DateTime   @updatedAt
+  id          Int       @id @default(autoincrement())
+  avatar      String?   @db.VarChar(255)
+  name        String    @db.VarChar(100)
+  username    String    @unique @db.VarChar(100)
+  email       String    @unique @db.VarChar(100)
+  password    String    @db.VarChar(255)
+  birthDate   DateTime? @db.Date @map("birth_of_date")
+  phoneNumber String?   @db.VarChar(100) @map("phone_number")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  role_id       Int?
-  role          Role?      @relation(fields: [role_id], references: [id], onDelete: Cascade)
-  customer      Customer?
-  shifts        Shift[]
-  orders        Order[]    @relation("CashierOrders")
+  roleId      Int      @map("role_id")
+  role        Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  @@index([role_id])
+  customer    Customer?
+  shifts      Shift[]
+  orders      Order[]   @relation("CashierOrders")
+
+  @@index([roleId])
+  @@map("users")
 }
 
 model Customer {
-  id          Int        @id @default(autoincrement())
-  user_id     Int        @unique
-  points      Int?       @default(0)
-  created_at  DateTime   @default(now())
-  updated_at  DateTime   @updatedAt
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique @map("user_id")
+  points    Int?     @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  user        User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  carts       Cart[]
-  wishlists   Wishlist[]
-  orders      Order[]
-  reviews     Review[]
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  carts     Cart[]
+  wishlists Wishlist[]
+  orders    Order[]
+  reviews   Review[]
 
-  @@index([user_id])
+  @@index([userId])
+  @@map("customers")
 }
 
 model Category {
-  id          Int       @id @default(autoincrement())
-  name        String    @db.VarChar(100)
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  products    Product[]
+  products  Product[]
+
+  @@map("categories")
 }
 
 model Product {
-  id               Int             @id @default(autoincrement())
-  category_id      Int
-  name             String          @db.VarChar(100)
-  description      String          @db.Text
-  price            Decimal         @db.Decimal(10,2)
-  stock            Int             @default(0)
-  image            String          @db.VarChar(255)
-  created_at       DateTime        @default(now())
-  updated_at       DateTime        @updatedAt
+  id          Int      @id @default(autoincrement())
+  categoryId  Int      @map("category_id")
+  name        String   @db.VarChar(100)
+  description String   @db.Text
+  price       Decimal  @db.Decimal(10,2)
+  stock       Int      @default(0)
+  image       String   @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  category         Category        @relation(fields: [category_id], references: [id], onDelete: Cascade)
-  order_items      OrderItem[]
-  cart_items       CartItem[]
-  wishlists        Wishlist[]
-  reviews          Review[]
-  discounts        ProductDiscount[]
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  @@index([category_id])
+  orderItems  OrderItem[]
+  cartItems   CartItem[]
+  wishlists   Wishlist[]
+  reviews     Review[]
+  discounts   ProductDiscount[]
+
+  @@index([categoryId])
+  @@map("products")
 }
 
 model Wishlist {
-  id           Int        @id @default(autoincrement())
-  customer_id  Int
-  product_id   Int
-  created_at   DateTime    @default(now())
-  updated_at   DateTime    @updatedAt
+  id         Int      @id @default(autoincrement())
+  customerId Int      @map("customer_id")
+  productId  Int      @map("product_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  customer     Customer    @relation(fields: [customer_id], references: [id], onDelete: Cascade)
-  product      Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@unique([customer_id, product_id])
-  @@index([customer_id])
-  @@index([product_id])
+  @@unique([customerId, productId])
+  @@index([customerId])
+  @@index([productId])
+  @@map("wishlists")
 }
 
 model Cart {
-  id           Int       @id @default(autoincrement())
-  customer_id  Int
-  total        Decimal   @default("0.00") @db.Decimal(10,2)
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
+  id         Int      @id @default(autoincrement())
+  customerId Int      @map("customer_id")
+  total      Decimal  @default("0.00") @db.Decimal(10,2)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  customer     Customer  @relation(fields: [customer_id], references: [id], onDelete: Cascade)
-  items        CartItem[]
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items      CartItem[]
 
-  @@index([customer_id])
+  @@index([customerId])
+  @@map("carts")
 }
 
 model CartItem {
-  id               Int       @id @default(autoincrement())
-  cart_id          Int
-  product_id       Int
-  quantity         Int       @default(1)
-  price            Decimal   @db.Decimal(10,2)
-  subtotal         Decimal   @db.Decimal(10,2)
-  created_at       DateTime  @default(now())
-  updated_at       DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  cartId    Int      @map("cart_id")
+  productId Int      @map("product_id")
+  quantity  Int      @default(1)
+  price     Decimal  @db.Decimal(10,2)
+  subtotal  Decimal  @db.Decimal(10,2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  cart             Cart      @relation(fields: [cart_id], references: [id], onDelete: Cascade)
-  product          Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@unique([cart_id, product_id])
-  @@index([cart_id])
-  @@index([product_id])
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@index([productId])
+  @@map("cart_items")
 }
 
 model Order {
-  id                 Int            @id @default(autoincrement())
-  customer_id        Int?
-  cashier_id         Int?
-  order_code         String         @unique
-  source             OrderSource
-  total              Decimal        @db.Decimal(10,2)
-  final_total        Decimal        @db.Decimal(10,2)
-  status             OrderStatus    @default(pending)
-  payment_status     PaymentStatus  @default(pending)
-  discount_id        Int?
-  created_at         DateTime       @default(now())
-  updated_at         DateTime       @updatedAt
+  id            Int           @id @default(autoincrement())
+  customerId    Int?          @map("customer_id")
+  cashierId     Int?          @map("cashier_id")
+  orderCode     String        @unique @map("order_code")
+  source        OrderSource
+  total         Decimal       @db.Decimal(10,2)
+  finalTotal    Decimal       @db.Decimal(10,2) @map("final_total")
+  status        OrderStatus   @default(pending)
+  paymentStatus PaymentStatus @default(pending) @map("payment_status")
+  discountId    Int?          @map("discount_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
 
-  customer           Customer?      @relation(fields: [customer_id], references: [id], onDelete: Cascade)
-  cashier            User?          @relation("CashierOrders", fields: [cashier_id], references: [id], onDelete: Cascade)
-  order_items        OrderItem[]
-  payments           Payment[]
-  transactions       Transaction[]
-  discount           Discount?      @relation(fields: [discount_id], references: [id])
+  customer      Customer?     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  cashier       User?         @relation("CashierOrders", fields: [cashierId], references: [id], onDelete: Cascade)
+  orderItems    OrderItem[]
+  payments      Payment[]
+  transactions  Transaction[]
+  discount      Discount?     @relation(fields: [discountId], references: [id])
 
-  @@index([customer_id])
-  @@index([cashier_id])
-  @@index([discount_id])
+  @@index([customerId])
+  @@index([cashierId])
+  @@index([discountId])
+  @@map("orders")
 }
 
 model OrderItem {
-  id               Int       @id @default(autoincrement())
-  order_id         Int
-  product_id       Int
-  quantity         Int
-  price            Decimal   @db.Decimal(10,2)
-  subtotal         Decimal   @db.Decimal(10,2)
-  created_at       DateTime  @default(now())
-  updated_at       DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  orderId   Int      @map("order_id")
+  productId Int      @map("product_id")
+  quantity  Int
+  price     Decimal  @db.Decimal(10,2)
+  subtotal  Decimal  @db.Decimal(10,2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  order            Order     @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  product          Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@index([order_id])
-  @@index([product_id])
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
 }
 
 model Payment {
-  id               Int                @id @default(autoincrement())
-  order_id         Int
-  method           PaymentMethod
-  amount           Decimal            @db.Decimal(10,2)
-  status           PaymentResultStatus
-  transaction_time DateTime?
-  created_at       DateTime           @default(now())
-  updated_at       DateTime           @updatedAt
+  id              Int                @id @default(autoincrement())
+  orderId         Int                @map("order_id")
+  method          PaymentMethod
+  amount          Decimal            @db.Decimal(10,2)
+  status          PaymentResultStatus@default(pending)
+  transactionTime DateTime?          @map("transaction_time")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
 
-  order            Order              @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  transactions     Transaction[]
+  order           Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
 
-  @@index([order_id])
+  @@index([orderId])
+  @@map("payments")
 }
 
 model Shift {
-  id         Int        @id @default(autoincrement())
-  user_id    Int
-  start_time DateTime
-  end_time   DateTime?
-  cash_start Decimal     @default("0.00") @db.Decimal(10,2)
-  cash_end   Decimal     @default("0.00") @db.Decimal(10,2)
-  notes      String?     @db.Text
-  status     ShiftStatus
-  created_at DateTime    @default(now())
-  updated_at DateTime    @updatedAt
+  id        Int        @id @default(autoincrement())
+  userId    Int        @map("user_id")
+  startTime DateTime   @map("start_time")
+  endTime   DateTime?  @map("end_time")
+  cashStart Decimal    @default("0.00") @db.Decimal(10,2) @map("cash_start")
+  cashEnd   Decimal    @default("0.00") @db.Decimal(10,2) @map("cash_end")
+  notes     String?    @db.Text
+  status    ShiftStatus
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
 
-  user       User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
-  @@index([user_id])
+  @@index([userId])
+  @@map("shifts")
 }
 
 model Transaction {
-  id          Int              @id @default(autoincrement())
-  shift_id    Int
-  order_id    Int?
-  payment_id  Int?
+  id          Int             @id @default(autoincrement())
+  shiftId     Int             @map("shift_id")
+  orderId     Int             @map("order_id")
+  paymentId   Int             @map("payment_id")
   type        TransactionType
-  amount      Decimal          @db.Decimal(10,2)
-  description String?          @db.VarChar(255)
-  created_at  DateTime         @default(now())
-  updated_at  DateTime         @updatedAt
+  amount      Decimal         @db.Decimal(10,2)
+  description String?         @db.VarChar(255)
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
 
-  shift       Shift            @relation(fields: [shift_id], references: [id], onDelete: Cascade)
-  order       Order?           @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  payment     Payment?         @relation(fields: [payment_id], references: [id], onDelete: Cascade)
+  shift       Shift           @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  order       Order?          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payment     Payment?        @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
-  @@index([shift_id])
-  @@index([order_id])
-  @@index([payment_id])
+  @@index([shiftId])
+  @@index([orderId])
+  @@index([paymentId])
+  @@map("transactions")
 }
 
 model Review {
-  id          Int       @id @default(autoincrement())
-  customer_id Int
-  product_id  Int
-  rating      Int
-  comment     String?   @db.Text
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  id         Int      @id @default(autoincrement())
+  customerId Int      @map("customer_id")
+  productId  Int      @map("product_id")
+  rating     Int
+  comment    String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  customer    Customer  @relation(fields: [customer_id], references: [id], onDelete: Cascade)
-  product     Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@index([customer_id])
-  @@index([product_id])
+  @@index([customerId])
+  @@index([productId])
+  @@map("reviews")
 }
 
 model Discount {
-  id            Int           @id @default(autoincrement())
-  name          String        @db.VarChar(100)
-  description   String?       @db.Text
-  type          DiscountType
-  value         Decimal       @db.Decimal(10,2)
-  start_date    DateTime?
-  end_date      DateTime?
-  is_active     Boolean       @default(true)
-  created_at    DateTime      @default(now())
-  updated_at    DateTime      @updatedAt
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(100)
+  description String?       @db.Text
+  type        DiscountType
+  value       Decimal       @db.Decimal(10,2)
+  startDate   DateTime?     @map("start_date")
+  endDate     DateTime?     @map("end_date")
+  isActive    Boolean       @default(true) @map("is_active")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
 
-  products      ProductDiscount[]
-  orders        Order[]
+  products    ProductDiscount[]
+  orders      Order[]
+
+  @@map("discounts")
 }
 
 model ProductDiscount {
-  id            Int       @id @default(autoincrement())
-  product_id    Int
-  discount_id   Int
+  id         Int      @id @default(autoincrement())
+  productId  Int      @map("product_id")
+  discountId Int      @map("discount_id")
 
-  product       Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  discount      Discount  @relation(fields: [discount_id], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  discount   Discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
 
-  @@index([product_id])
-  @@index([discount_id])
+  @@index([productId])
+  @@index([discountId])
+  @@map("product_discounts")
 }

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "prisma": {
-    "seed": "tsx prisma/seeders/roleSeeders.ts"
+    "seed": "tsx prisma/seeders/rolesSeeders.ts"
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",

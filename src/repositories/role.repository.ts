@@ -20,7 +20,7 @@ export class RoleRepository{
     try {
       const roles = await prisma.role.findMany({
         orderBy: {
-          created_at: "desc"
+          createdAt: "desc"
         }
       });
       return roles;

@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-async function roleSeeders() {
+async function rolesSeeders() {
   const roles = ["admin", "cashier", "customer"];
 
   for (const name of roles) {
@@ -15,7 +15,7 @@ async function roleSeeders() {
   console.log("Seed roles successfully:", roles.join(", "));
 }
 
-roleSeeders()
+rolesSeeders()
   .then(async () => {
     await prisma.$disconnect();
   })

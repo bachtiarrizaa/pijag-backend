@@ -8,10 +8,6 @@ export const generateAccessToken = (payload: AccessTokenSign) => {
   });
 }
 
-// export const verifyAccessToken = (token: string) => {
-//   return jwt.verify(token, appConfig.JWT_SECRET);
-// }
-
 export type AccessTokenPayload = AccessTokenSign & JwtPayload;
 
 export const verifyAccessToken = (token: string): AccessTokenPayload => {
