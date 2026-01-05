@@ -14,7 +14,7 @@ const router = Router();
 
 router.use("/auth", authRoutes);
 router.use("/role", roleRoutes);
-// router.use("/category", categoryRoutes);
+router.use("/category", categoryRoutes);
 // router.use("/profile", profileRoutes);
 // router.use("/discount", discountRoutes);
 // router.use("/product", productRoutes);
