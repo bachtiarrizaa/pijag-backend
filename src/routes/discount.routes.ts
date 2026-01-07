@@ -1,12 +1,13 @@
 import Router from "express";
-import { createDiscountController, deleteDiscountController, getDiscountController, updateDiscountController } from "../controllers/discount/discount.controller";
-import { isAdmin } from "../middleware/auth.middleware";
+import { AuthMiddleware } from "../middleware/auth.middleware";
+import { DiscountController } from "../controllers/discount.controller";
 
 const router = Router();
+router.use(AuthMiddleware.isAdmin)
 
-router.get("/", isAdmin, getDiscountController);
-router.post("/", isAdmin, createDiscountController);
-router.put("/:id", isAdmin, updateDiscountController);
-router.delete("/:id", isAdmin, deleteDiscountController);
+router.get("/", DiscountController.getDiscounts);
+router.post("/", DiscountController.create);
+router.put("/:id", DiscountController.update);
+router.delete("/:id", DiscountController.delete);
 
 export default router;
