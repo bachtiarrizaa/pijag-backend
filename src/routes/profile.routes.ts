@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { authenticateToken } from "../middleware/auth.middleware";
 import { uploadAvatar } from "../middleware/uploadImg.middleware";
-import { getProfileController, updatedUserController } from "../controllers/profile/profile.controller";
+import { AuthMiddleware } from "../middleware/auth.middleware";
+import { ProfileController } from "../controllers/profile.controller";
 
 const router = Router();
 
-router.get("/", authenticateToken, getProfileController);
-router.put("/update", authenticateToken, uploadAvatar, updatedUserController);
+router.get("/", AuthMiddleware.authenticateToken, ProfileController.getProfile);
+router.put("/update", AuthMiddleware.authenticateToken, uploadAvatar, ProfileController.update);
 
 export default router;

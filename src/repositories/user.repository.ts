@@ -20,6 +20,45 @@ export class UserRepository{
       return user;
     } catch (error) {
       throw error;
-    }
-  }
+    };
+  };
+
+  static async findUserById (userId: number) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+      return user;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async findUserByEmail (email: string, userId: number) {
+    try {
+      const user = await prisma.user.findFirst({
+        where: {
+          email,
+          NOT: { id: userId}
+        }
+      });
+      return user;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async findUserByUsername(username: string, userId: number) {
+    try {
+      const user = await prisma.user.findFirst({
+        where: {
+          username,
+          NOT: { id: userId }
+        }
+      });
+      return user;
+    } catch (error) {
+      throw error;
+    };
+  };
 }
