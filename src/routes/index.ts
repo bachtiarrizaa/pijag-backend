@@ -19,7 +19,7 @@ router.use("/profile", profileRoutes);
 // router.use("/discount", discountRoutes);
 router.use("/products", productRoutes);
 // router.use("/products", productDiscountRoutes);
-// router.use("/cart", cartRoutes);
+router.use("/cart", cartRoutes);
 // router.use("/cashier", shiftRoutes)
 // router.use("/order", orderRoutes);
 
