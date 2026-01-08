@@ -7,5 +7,7 @@ router.use(AuthMiddleware.isAdmin);
 
 router.get("/", ProductDiscountController.getProductDiscounts);
 router.post("/", ProductDiscountController.create);
+router.put("/:id", ProductDiscountController.update);
+router.delete("/:id", ProductDiscountController.delete);
 
 export default router;

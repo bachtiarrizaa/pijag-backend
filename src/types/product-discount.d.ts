@@ -11,5 +11,5 @@ export interface ProductDiscountCreateRequest {
 export interface ProductDiscountUpdateRequest {
   productId: number,
   discountId: number,
-  isActive: boolean
+  // isActive: boolean
 }
