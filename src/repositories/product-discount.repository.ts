@@ -16,6 +16,19 @@ export class ProductDiscountRepository {
     };
   };
 
+  static async findProductDiscounts() {
+    try {
+      const productDiscount = await prisma.productDiscount.findMany({
+        orderBy: {
+          createdAt: "desc"
+        }
+      });
+      return productDiscount;
+    } catch (error) {
+      throw error;
+    };
+  };
+
   static async create(payload: ProductDiscountCreateRequest) {
     try {
       const productDiscount = await prisma.productDiscount.create({

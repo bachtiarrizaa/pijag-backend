@@ -5,6 +5,15 @@ import { ProductDiscountCreateRequest } from "../types/product-discount";
 import { ErrorHandler } from "../utils/error.utils";
 
 export class ProductDiscountService{
+  static async getProductDiscount() {
+    try {
+      const productDiscounts = await ProductDiscountRepository.findProductDiscounts();
+      return productDiscounts;
+    } catch (error) {
+      throw error;
+    };
+  };
+  
   static async create(payload: ProductDiscountCreateRequest) {
     try {
       const existingProductAndDiscount = await ProductDiscountRepository.findProductAndDiscount(payload.productId, payload.discountId);

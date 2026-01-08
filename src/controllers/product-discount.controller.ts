@@ -3,6 +3,19 @@ import { ProductDiscountCreateRequest } from "../types/product-discount";
 import { ProductDiscountService } from "../services/product-discount.service";
 
 export class ProductDiscountController {
+  static async getProductDiscounts(req: Request, res: Response, next: NextFunction) {
+    try {
+      const productDiscounts = await ProductDiscountService.getProductDiscount();
+      res.status(200).json({
+        success: true,
+        message: "Product discounts fetched successfully",
+        data: productDiscounts
+      });
+    } catch (error) {
+      next(error);
+    };
+  };
+  
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
       const payload = req.body as ProductDiscountCreateRequest;

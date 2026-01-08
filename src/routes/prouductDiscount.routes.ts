@@ -5,6 +5,7 @@ import { ProductDiscountController } from "../controllers/product-discount.contr
 const router = Router();
 router.use(AuthMiddleware.isAdmin);
 
+router.get("/", ProductDiscountController.getProductDiscounts);
 router.post("/", ProductDiscountController.create);
 
 export default router;
