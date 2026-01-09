@@ -20,7 +20,7 @@ router.use("/discount", discountRoutes);
 router.use("/products", productRoutes);
 router.use("/product-discount", productDiscountRoutes);
 router.use("/cart", cartRoutes);
-// router.use("/cashier", shiftRoutes)
+router.use("/cashier", shiftRoutes)
 // router.use("/order", orderRoutes);
 
 export default router;
