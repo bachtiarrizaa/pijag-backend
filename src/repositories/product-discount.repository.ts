@@ -1,5 +1,5 @@
 import prisma from "../config/prisma.config";
-import { ProductDiscountCreateRequest, ProductDiscountUpdateRequest } from "../types/product-discount";
+import { ProductDiscountCreateRequest } from "../types/product-discount";
 
 export class ProductDiscountRepository {
   static async findProductAndDiscount(productId: number, discountId: number) {
@@ -7,7 +7,7 @@ export class ProductDiscountRepository {
       const productDiscount = await prisma.productDiscount.findFirst({
         where: {
           productId,
-          discountId
+          discountId,
         }
       });
       return productDiscount;
@@ -18,12 +18,10 @@ export class ProductDiscountRepository {
 
   static async findProductDiscounts() {
     try {
-      const productDiscount = await prisma.productDiscount.findMany({
-        orderBy: {
-          createdAt: "desc"
-        }
+      const productDiscounts = await prisma.productDiscount.findMany({
+        orderBy: { id: "desc" },
       });
-      return productDiscount;
+      return productDiscounts;
     } catch (error) {
       throw error;
     };
@@ -32,13 +30,41 @@ export class ProductDiscountRepository {
   static async findProductDiscountById(productDiscountId: number) {
     try {
       const productDiscount = await prisma.productDiscount.findFirst({
-        where: { id: productDiscountId }
+        where: { id: productDiscountId },
       });
       return productDiscount;
     } catch (error) {
       throw error;
     };
   };
+
+  static async updateStatus(productDiscountId: number, isActive: boolean) {
+    try {
+      const productDiscount = await prisma.productDiscount.update({
+        where: { id: productDiscountId },
+        data: { isActive },
+      });
+      return productDiscount;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async deactivateOtherDiscounts(productId: number, discountIdToActivate: number) {
+    try {
+      const productDiscount = await prisma.productDiscount.updateMany({
+        where: {
+          productId,
+          discountId: { not: discountIdToActivate },
+          isActive: true
+        },
+        data: { isActive: false }
+      });
+      return productDiscount;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   static async create(payload: ProductDiscountCreateRequest) {
     try {
@@ -46,35 +72,21 @@ export class ProductDiscountRepository {
         data: {
           productId: payload.productId,
           discountId: payload.discountId,
+          isActive: true,
         },
       });
       return productDiscount;
     } catch (error) {
       throw error;
-    };
-  };
-
-  static async update(productDiscountId: number, payload: ProductDiscountUpdateRequest) {
-    try {
-      const productDiscount = await prisma.productDiscount.update({
-        where: { id: productDiscountId },
-        data: {
-          productId: payload.productId,
-          discountId: payload.discountId
-        }
-      });
-      return productDiscount;
-    } catch (error) {
-      throw error;
-    };
-  };
+    }
+  }
 
   static async delete(productDiscountId: number) {
     try {
       const productDiscount = await prisma.productDiscount.delete({
-        where: { id: productDiscountId }
+        where: { id: productDiscountId },
       });
-      return productDiscount;
+      return productDiscount;  
     } catch (error) {
       throw error;
     };

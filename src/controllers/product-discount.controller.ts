@@ -16,7 +16,7 @@ export class ProductDiscountController {
       next(error);
     };
   };
-  
+
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
       const payload = req.body as ProductDiscountCreateRequest;
@@ -38,7 +38,7 @@ export class ProductDiscountController {
       const productDiscountId = Number(req.params.id);
       if (!productDiscountId) {
         throw new ErrorHandler(400, "Discount Id is required");
-      };
+      }
 
       const payload = req.body as ProductDiscountUpdateRequest;
 
@@ -54,21 +54,39 @@ export class ProductDiscountController {
     };
   };
 
-  static async delete(req: Request, res: Response, next: NextFunction) {
+  static async updateStatus(req: Request, res: Response, next: NextFunction) {
     try {
       const productDiscountId = Number(req.params.id);
       if (!productDiscountId) {
-        throw new ErrorHandler(400, "Discount Id is required");
+        throw new ErrorHandler(400, "Product Discount Id is required");
       };
 
-      const productDiscount = await ProductDiscountService.delete(productDiscountId);
+      const productDiscount = await ProductDiscountService.updateStatus(productDiscountId);
 
       res.status(200).json({
         success: true,
-        message: "Product discount delete successfully"
+        message: "Product discount status update successfully",
+        data: productDiscount
       });
     } catch (error) {
       next(error);
     };
   };
-}
+
+  static async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const productDiscountId = Number(req.params.id);
+      if (!productDiscountId) {
+        throw new ErrorHandler(400, "Product Discount Id is required");
+      };
+
+      const productDiscount = await ProductDiscountService.delete(productDiscountId);
+      res.status(200).json({
+        success: true,
+        message: "Product discount delete successfully"
+      })
+    } catch (error) {
+      next(error);
+    };
+  };
+};

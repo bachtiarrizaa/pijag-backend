@@ -62,6 +62,20 @@ export class DiscountRepository {
     };
   };
 
+  static async findDiscountIsActive(discountId: number) {
+    try {
+      const discount = await prisma.discount.findFirst({
+        where: {
+          id: discountId,
+          isActive: true
+        }
+      });
+      return discount;
+    } catch (error) {
+      throw error;
+    };
+  };
+
   static async update(discountId: number, payload: DiscountUpdateRequest) {
     try {
       const discount = await prisma.discount.update({
