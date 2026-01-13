@@ -17,10 +17,11 @@ export class DiscountUtils {
               .mul(new Decimal(100).minus(discountValue))
               .div(new Decimal(100));
           } else {
-            finalPrice = finalPrice.minus(discountValue);
+            // finalPrice = finalPrice.minus(discountValue, new Decimal(0));
+            finalPrice = Decimal.max(finalPrice, new Decimal(0));
+
           }
 
-          // discount = activeDiscount;
           const { id, name, type, value, startDate, endDate } = activeDiscount;
 
           discount = { id, name, type, value, startDate, endDate };

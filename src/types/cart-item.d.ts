@@ -17,6 +17,12 @@ export interface CartItemCreateRequest {
 }
 
 export interface CartItemUpdateQuantity {
-  quantity: number;
+  quantity: number,
+  price: Decimal,
+  subtotal: Decimal
+}
+
+export interface CartItemUpdateRequest {
+  price: Decimal,
   subtotal: Decimal
 }

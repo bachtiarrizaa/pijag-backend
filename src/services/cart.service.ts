@@ -4,9 +4,8 @@ import { CartRepository } from "../repositories/cart.repository";
 import { CustomerRepository } from "../repositories/customer.repository";
 import { ProductRepository } from "../repositories/product.repository";
 import { Cart, CartCreateRequest, CartUpdateRequest } from "../types/cart";
-import { CartItemCreateRequest } from "../types/cart-item";
+import { DiscountUtils } from "../utils/discount.utils";
 import { ErrorHandler } from "../utils/error.utils";
-import prisma from "../config/prisma.config";
 
 export class CartService{
   static async getCart(customerId: number) {
@@ -25,73 +24,70 @@ export class CartService{
 
   static async addItem(customerId: number, payload: CartCreateRequest) {
     try {
-      // const { productId, quantity } = payload;
-      const cartData: Cart = {
-        productId: payload.productId,
-        quantity: payload.quantity
-      };
-
       const customer = await CustomerRepository.findByCustomerId(customerId);
       if (!customer) {
         throw new ErrorHandler(404, "Customer not found");
-      };
+      }
 
-      if (cartData.quantity <= 0) {
+      if (payload.quantity <= 0) {
         throw new ErrorHandler(400, "Quantity must be greater than 0");
-      };
+      }
 
-      const product = await ProductRepository.findProductById(cartData.productId);
+      const product = await ProductRepository.findProductById(payload.productId);
       if (!product) {
         throw new ErrorHandler(404, "Product not found");
-      };
+      }
+
+      const pricedProduct = DiscountUtils.calculateDiscount(product);
+      const finalPrice = pricedProduct.finalPrice;
 
       let cart = await CartRepository.findCartByCustomerId(customerId);
       if (!cart) {
         cart = await CartRepository.create(customerId);
-      };
+      }
 
       const existingItem = await CartItemRepository.findCartItemProduct(
         cart.id,
-        cartData.productId
+        payload.productId
       );
 
-      if (existingItem && existingItem.quantity + cartData.quantity > product.stock) {
+      const totalQuantity = existingItem
+        ? existingItem.quantity + payload.quantity
+        : payload.quantity;
+
+      if (totalQuantity > product.stock) {
         throw new ErrorHandler(400, "Quantity exceeds available stock");
       }
 
-      const price = product.price;
       let cartItem;
-      const subtotal = price.mul(cartData.quantity);
 
       if (existingItem) {
-        const newQuantity = existingItem.quantity + cartData.quantity;
-
         cartItem = await CartItemRepository.updateQuantity(
-          existingItem.id, {
-            quantity: newQuantity,
-            subtotal: price.mul(newQuantity)
+          existingItem.id,
+          {
+            quantity: totalQuantity,
+            price: finalPrice,
+            subtotal: finalPrice.mul(totalQuantity)
           }
         );
       } else {
         cartItem = await CartItemRepository.create({
           cartId: cart.id,
-          productId: cartData.productId,
-          quantity: cartData.quantity,
-          price: product.price,
-          subtotal
+          productId: payload.productId,
+          quantity: payload.quantity,
+          price: finalPrice,
+          subtotal: finalPrice.mul(payload.quantity)
         });
-      };
+      }
 
       const total = await CartRepository.calculateCartTotal(cart.id);
-
       await CartRepository.updateTotal(cart.id, total);
 
-      // return await CartRepository.findCartByCustomerId(customerId);
       return cartItem;
     } catch (error) {
       throw error;
-    };
-  };
+    }
+  }
 
   static async updateItem(cartItemId: number, payload: CartUpdateRequest) {
     try {
@@ -131,13 +127,16 @@ export class CartService{
         };
       }
 
-      const subtotal = product.price.mul(quantity);
+      const pricedProduct = DiscountUtils.calculateDiscount(product);
+      const finalPrice = pricedProduct.finalPrice;
+      const subtotal = finalPrice.mul(quantity);
 
       const updateItem = await CartItemRepository.updateQuantity(
         cartItemId,
         {
           quantity,
-          subtotal
+          subtotal,
+          price: finalPrice
         }
       );
 
@@ -157,11 +156,13 @@ export class CartService{
         throw new ErrorHandler(404, "Cart item not found");
       };
 
+      const cartId = findCartItem.cartId;
+
       const deleteItem = await CartItemRepository.delete(cartItemId);
 
-      const total = await CartRepository.calculateCartTotal(cartItemId);
+      const total = await CartRepository.calculateCartTotal(cartId);
 
-      await CartRepository.updateTotal(cartItemId, total);
+      await CartRepository.updateTotal(cartId, total);
 
       return deleteItem;
     } catch (error) {

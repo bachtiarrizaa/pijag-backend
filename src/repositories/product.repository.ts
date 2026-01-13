@@ -63,7 +63,8 @@ export class ProductRepository {
         },
         include: {
           discount: true
-        }
+        },
+        take: 1
       }
     }
   }
