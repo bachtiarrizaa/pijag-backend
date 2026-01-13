@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.config";
 import { ProductCreateRequest, ProductUpdateRequest } from "../types/product";
+import { DiscountUtils } from "../utils/discount.utils";
 
 export class ProductRepository {
   static async findProductByName(name: string) {
@@ -45,10 +46,34 @@ export class ProductRepository {
     };
   };
 
+  private static get activeDiscount() {
+    const now = new Date();
+
+    return {
+      discounts: {
+        where: {
+          isActive: true,
+          discount: {
+            isActive: true,
+            AND: [
+              { OR: [{ startDate: null }, { startDate: { lte: now } }] },
+              { OR: [{ endDate: null }, { endDate: { gte: now } }] }
+            ]
+          }
+        },
+        include: {
+          discount: true
+        }
+      }
+    }
+  }
+
   static async findProductById(productId: number) {
     try {
+      const now = new Date();
       const product = await prisma.product.findFirst({
-        where: { id: productId }
+        where: { id: productId },
+        include: this.activeDiscount
       });
       return product;
     } catch (error) {
@@ -62,6 +87,7 @@ export class ProductRepository {
         orderBy: {
           createdAt: "desc"
         },
+        include: this.activeDiscount
       });
       return products;
     } catch (error) {

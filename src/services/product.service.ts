@@ -2,6 +2,7 @@ import prisma from "../config/prisma.config";
 import { CategoryRepository } from "../repositories/category.repository";
 import { ProductRepository } from "../repositories/product.repository";
 import { Product, ProductCreateRequest, ProductUpdateRequest } from "../types/product";
+import { DiscountUtils } from "../utils/discount.utils";
 import { ErrorHandler } from "../utils/error.utils";
 
 export class ProductService{
@@ -40,11 +41,18 @@ export class ProductService{
   static async getProducts() {
     try {
       const products = await ProductRepository.findProducts();
-      return products;
+
+      const productDiscounts = await Promise.all(
+        products.map(product =>
+          DiscountUtils.calculateDiscount(product)
+        )
+      );
+
+      return productDiscounts;
     } catch (error) {
       throw error;
-    };
-  };
+    }
+  }
 
   static async getProductById(productId: number) {
     try {
@@ -52,8 +60,9 @@ export class ProductService{
       if (!product) {
         throw new ErrorHandler(404, "Product not found")
       };
-      
-      return product;
+
+      const productDiscount = DiscountUtils.calculateDiscount(product);
+      return productDiscount;
     } catch (error) {
       throw error;
     };
