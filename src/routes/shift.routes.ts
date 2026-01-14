@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { isCashier } from "../middleware/authMiddleware";
-import { startShiftControllers, endShiftControllers } from "../controllers/shift/shift.controllers";
+import { AuthMiddleware } from "../middleware/auth.middleware";
+import { ShiftController } from "../controllers/shift.controller";
 
 const router = Router();
 
-router.use(isCashier);
+router.use(AuthMiddleware.isCashier);
 
-router.post("/shift/start", startShiftControllers);
-router.post("/shift/end", endShiftControllers)
+router.post("/shift/start", ShiftController.startShift);
+router.post("/shift/end", ShiftController.closeShift);
 
 export default router;
