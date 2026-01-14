@@ -1,7 +1,9 @@
+export type DiscountType = "percent" | "fixed";
+
 export interface Discount {
   name: string,
   description: string,
-  type: "percent" | "fixed",
+  type: DiscountType,
   value: number,
   startDate?: Date,
   endDate?: Date,
@@ -11,7 +13,7 @@ export interface Discount {
 export interface DiscountCreateRequest {
   name: string,
   description: string,
-  type: "percent" | "fixed",
+  type: DiscountType,
   value: number,
   startDate?: Date,
   endDate?: Date,
@@ -21,7 +23,7 @@ export interface DiscountCreateRequest {
 export interface DiscountUpdateRequest {
   name: string,
   description: string,
-  type: "percent" | "fixed",
+  type: DiscountType,
   value: number,
   startDate?: Date,
   endDate?: Date,

@@ -1,5 +1,5 @@
 import { DiscountRepository } from "../repositories/discount.repository";
-import { DiscountCreateRequest, DiscountUpdateRequest } from "../types/discount";
+import { DiscountCreateRequest, DiscountType, DiscountUpdateRequest } from "../types/discount";
 import { ErrorHandler } from "../utils/error.utils";
 
 export class DiscountService {
@@ -36,17 +36,19 @@ export class DiscountService {
     };
   };
 
-  static async getDiscounts(type?: string) {
+  static async getDiscounts(type?: DiscountType) {
     try {
       if (type && !["percent", "fixed"].includes(type)) {
         throw new ErrorHandler(400, "Invalid discount type query");
       }
-      const discounts = await DiscountRepository.findDiscounts();
+
+      const discounts = await DiscountRepository.findDiscounts(type);
       return discounts;
     } catch (error) {
       throw error;
     };
   };
+
 
   static async update(discountId: number, payload: DiscountUpdateRequest) {
     try {

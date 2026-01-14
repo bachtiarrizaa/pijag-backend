@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { DiscountCreateRequest, DiscountUpdateRequest } from "../types/discount";
+import { DiscountCreateRequest, DiscountType, DiscountUpdateRequest } from "../types/discount";
 import { DiscountService } from "../services/discount.service";
 import { ErrorHandler } from "../utils/error.utils";
 
@@ -20,7 +20,7 @@ export class DiscountController {
 
   static async getDiscounts(req: Request, res: Response, next: NextFunction) {
     try {
-      const { type } = req.params;
+      const type = req.query.type as DiscountType | undefined;
       const discounts = await DiscountService.getDiscounts(type);
       res.status(200).json({
         success: true,

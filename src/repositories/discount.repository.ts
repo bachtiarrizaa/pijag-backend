@@ -1,5 +1,5 @@
 import prisma from "../config/prisma.config";
-import { DiscountCreateRequest, DiscountUpdateRequest } from "../types/discount";
+import { DiscountCreateRequest, DiscountType, DiscountUpdateRequest } from "../types/discount";
 
 export class DiscountRepository {
   static async create(payload: DiscountCreateRequest) {
@@ -21,12 +21,10 @@ export class DiscountRepository {
     };
   };
 
-  static async findDiscounts(type?: string) {
+  static async findDiscounts(type?: DiscountType) {
     try {
       const discounts = await prisma.discount.findMany({
-        where: {
-          type: type ? (type as any) : undefined
-        },
+        where: type ? { type } : {},
         orderBy: {
           createdAt: "desc"
         }
@@ -36,6 +34,7 @@ export class DiscountRepository {
       throw error;
     };
   };
+
 
   static async findDiscountById(discountId: number) {
     try {
