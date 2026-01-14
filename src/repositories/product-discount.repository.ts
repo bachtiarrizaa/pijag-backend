@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.config";
 import { ProductDiscountCreateRequest } from "../types/product-discount";
+import { ErrorHandler } from "../utils/error.utils";
 
 export class ProductDiscountRepository {
   static async findProductAndDiscount(productId: number, discountId: number) {
@@ -40,10 +41,24 @@ export class ProductDiscountRepository {
 
   static async updateStatus(productDiscountId: number, isActive: boolean) {
     try {
+      const findProductDiscount = await prisma.productDiscount.findFirst({
+        where: { id: productDiscountId },
+        include: { discount: true }
+      });
+
+      if (!findProductDiscount) {
+        throw new ErrorHandler(404, "ProductDiscount not found");
+      };
+      
+      if (!findProductDiscount.discount.isActive) {
+        throw new ErrorHandler(400, "Cannot update ProductDiscount: Discount is not active");
+      };
+
       const productDiscount = await prisma.productDiscount.update({
         where: { id: productDiscountId },
-        data: { isActive },
+        data: { isActive }
       });
+
       return productDiscount;
     } catch (error) {
       throw error;

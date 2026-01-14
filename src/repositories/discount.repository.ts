@@ -90,6 +90,13 @@ export class DiscountRepository {
           isActive: payload.isActive
         }
       });
+
+      if (payload.isActive === false) {
+        await prisma.productDiscount.updateMany({
+          where: { discountId },
+          data: { isActive: false }
+        });
+      }
       return discount;
     } catch (error) {
       throw error;
