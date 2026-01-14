@@ -82,6 +82,18 @@ export class ProductRepository {
     }
   }
 
+  static async findProductByIds(productIds: number[]) {
+    try {
+      const products = await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        include: this.activeDiscount
+      });
+      return products;
+    } catch (error) {
+      throw error;
+    };
+  };
+
   static async findProducts() {
     try {
       const products = await prisma.product.findMany({

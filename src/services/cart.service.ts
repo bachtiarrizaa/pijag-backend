@@ -3,20 +3,61 @@ import { CartItemRepository } from "../repositories/cart-item.repository";
 import { CartRepository } from "../repositories/cart.repository";
 import { CustomerRepository } from "../repositories/customer.repository";
 import { ProductRepository } from "../repositories/product.repository";
-import { Cart, CartCreateRequest, CartUpdateRequest } from "../types/cart";
+import { CartCreateRequest, CartUpdateRequest } from "../types/cart";
 import { DiscountUtils } from "../utils/discount.utils";
 import { ErrorHandler } from "../utils/error.utils";
 
 export class CartService{
   static async getCart(customerId: number) {
     try {
-      const cart = await CartRepository.findCartByCustomerId(customerId);
-
+      let cart = await CartRepository.findCartByCustomerId(customerId);
       if (!cart) {
         return await CartRepository.create(customerId);
-      }
+      };
 
-      return cart;
+      const productIds = cart.items.map(item => item.productId);
+      const products = await ProductRepository.findProductByIds(productIds);
+      
+      const productMap = new Map(products.map(p => [p.id, p]));
+
+      let total = new Decimal(0);
+
+      const updatedItems = cart.items.map(item => {
+        const product = productMap.get(item.productId);
+
+        if (!product) {
+          throw new ErrorHandler(404, `Product with id ${item.productId} not found`);
+        };
+
+        const pricedProduct = DiscountUtils.calculateDiscount(product);
+        const finalPrice = pricedProduct.finalPrice;
+        const subtotal = finalPrice.mul(item.quantity);
+
+        console.log(`Product: ${product.name} (ID: ${item.productId})`);
+        console.log(`Quantity: ${item.quantity}`);
+        console.log(`Final Price: ${finalPrice.toString()}`);
+        console.log(`Subtotal: ${subtotal.toString()}`);
+
+        total = total.add(subtotal);
+
+        return {
+          ...item,
+          price: finalPrice,
+          subtotal,
+          product: {
+            ...product,
+            discounts: pricedProduct.discount
+          }
+        };
+      });
+
+      await CartRepository.updateTotal(cart.id, total);
+
+      return {
+        ...cart,
+        items: updatedItems,
+        total
+      };
     } catch (error) {
       throw error;
     };
