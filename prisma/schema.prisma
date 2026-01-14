@@ -207,7 +207,7 @@ model Order {
   finalTotal    Decimal       @db.Decimal(10,2) @map("final_total")
   status        OrderStatus   @default(pending)
   paymentStatus PaymentStatus @default(pending) @map("payment_status")
-  discountId    Int?          @map("discount_id")
+  voucherId     Int?          @map("voucher_id")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
@@ -216,11 +216,11 @@ model Order {
   orderItems    OrderItem[]
   payments      Payment[]
   transactions  Transaction[]
-  discount      Discount?     @relation(fields: [discountId], references: [id])
+  voucher       Voucher?     @relation(fields: [voucherId], references: [id])
 
   @@index([customerId])
   @@index([cashierId])
-  @@index([discountId])
+  @@index([voucherId])
   @@map("orders")
 }
 
@@ -316,6 +316,22 @@ model Review {
   @@map("reviews")
 }
 
+model Voucher {
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(100)
+  type        DiscountType                  
+  value       Decimal       @db.Decimal(10,2)
+  minOrder    Decimal?      @db.Decimal(10,2) @map("min_order")
+  startDate   DateTime?     @map("start_date")
+  endDate     DateTime?     @map("end_date")
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  orders      Order[]
+}
+
+
 model Discount {
   id          Int           @id @default(autoincrement())
   name        String        @db.VarChar(100)
@@ -329,7 +345,6 @@ model Discount {
   updatedAt   DateTime      @updatedAt @map("updated_at")
 
   products    ProductDiscount[]
-  orders      Order[]
 
   @@map("discounts")
 }
