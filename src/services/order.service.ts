@@ -1,5 +1,5 @@
 import { OrderSource } from "@prisma/client";
-import { CreateOrderRequest, OrderItemRequest } from "../types/order";
+import { CreateOrderRequest } from "../types/order";
 import { ShiftRepository } from "../repositories/shift.repository";
 import { ErrorHandler } from "../utils/error.utils";
 import { OrderUtils } from "../utils/order.utils";
@@ -7,16 +7,13 @@ import { Decimal } from "@prisma/client/runtime/library";
 import { ProductRepository } from "../repositories/product.repository";
 import { DiscountUtils } from "../utils/discount.utils";
 import prisma from "../config/prisma.config";
+import { OrderRepository } from "../repositories/order.repository";
+import { OrderItemRequest } from "../types/order-item.";
 
 export class OrderService {
   static async create(cashierId: number | null, payload: CreateOrderRequest) {
     try {
-      let source: OrderSource;
-      if(cashierId) {
-        source = OrderSource.cashier;
-      } else {
-        source = OrderSource.customer;
-      }
+      const source = cashierId ? OrderSource.cashier : OrderSource.customer;
 
       if (source === OrderSource.cashier && cashierId !== null) {
         const activeShift = await ShiftRepository.findOpenShift(cashierId);
@@ -36,8 +33,8 @@ export class OrderService {
       };
 
       const orderCode = await OrderUtils.generateOrderCode(source);
+      
       let total = new Decimal(0);
-
       const validatedItems = await Promise.all(
         payload.items.map( async(item: OrderItemRequest) => {
           const product = await ProductRepository.findProductById(item.productId);
@@ -60,32 +57,17 @@ export class OrderService {
         })
       );
 
-      const createdOrder = await prisma.$transaction(async (tx) => {
-        const order = await tx.order.create({
-          data: {
-            customerId: payload.customerId || null,
-            cashierId: cashierId || null,
-            orderCode: orderCode,
-            source,
-            total,
-            finalTotal: total
-          }
-        });
+      const orderData: CreateOrderRequest = {
+        customerId: payload.customerId ?? null,
+        cashierId: cashierId ?? null,
+        orderCode,
+        source,
+        total,
+        finalTotal: total,
+        items: validatedItems
+      };
 
-        const orderItemData = validatedItems.map(item => ({
-          orderId: order.id,
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.price,
-          subtotal: item.subtotal
-        }));
-
-        await tx.orderItem.createMany({
-          data: orderItemData
-        });
-
-        return order;
-      });
+      const createdOrder = await OrderRepository.create(orderData);
 
       return {
         order: createdOrder,
