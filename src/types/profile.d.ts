@@ -4,5 +4,5 @@ export interface ProfileUpdateRequest {
     username: string,
     email: string,
     phoneNumber?: string | null,
-    birthDate?: string | null
+    birthDate?: Date | null
 }

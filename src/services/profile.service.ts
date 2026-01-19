@@ -36,7 +36,7 @@ export class ProfileService {
         username: payload.username,
         email: payload.email,
         phoneNumber: payload.phoneNumber ?? null,
-        birthDate: payload.birthDate ?? null
+        birthDate: payload.birthDate ? new Date(payload.birthDate) : null 
       };
 
       if (profileData.email) {
