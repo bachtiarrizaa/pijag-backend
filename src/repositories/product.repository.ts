@@ -1,8 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import prisma from "../config/prisma.config";
 import { ProductCreateRequest, ProductUpdateRequest } from "../types/product";
-import { DiscountUtils } from "../utils/discount.utils";
-import { error } from "console";
 import { ErrorHandler } from "../utils/error.utils";
 
 export class ProductRepository {
