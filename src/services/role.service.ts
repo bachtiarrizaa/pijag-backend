@@ -9,7 +9,7 @@ export class RoleService{
         name: payload.name
       };
 
-      const existingRole = await RoleRepository.findRoleByName(payload.name)
+      const existingRole = await RoleRepository.findRoleByName(roleData.name)
       if (existingRole) {
         throw new ErrorHandler(409, "Role already exist!");
       };
@@ -32,7 +32,7 @@ export class RoleService{
 
   static async update(roleId: number, payload: RoleUpdateRequest) {
     try {
-      const roleModel: Role = {
+      const roleData: Role = {
         name: payload.name
       };
 
@@ -41,13 +41,13 @@ export class RoleService{
         throw new ErrorHandler(404, "Role not found");
       };
 
-      const existingRole = await RoleRepository.findDuplicateRole(roleId, payload.name);
+      const existingRole = await RoleRepository.findDuplicateRole(roleId, roleData.name);
 
       if (existingRole) {
         throw new ErrorHandler(409, "Role already exist");
       };
 
-      const role = await RoleRepository.update(roleId, payload);
+      const role = await RoleRepository.update(roleId, roleData);
       return role
     } catch(error) {
       throw error;
