@@ -1,6 +1,9 @@
+import { Prisma, PrismaClient } from "@prisma/client";
 import prisma from "../config/prisma.config";
 import { ProductCreateRequest, ProductUpdateRequest } from "../types/product";
 import { DiscountUtils } from "../utils/discount.utils";
+import { error } from "console";
+import { ErrorHandler } from "../utils/error.utils";
 
 export class ProductRepository {
   static async findProductByName(name: string) {
@@ -43,6 +46,51 @@ export class ProductRepository {
       return product;
     } catch (error) {
       throw error
+    };
+  };
+
+  static async decrementStock(
+    productId: number, quantity: number,
+    tx?: Prisma.TransactionClient | PrismaClient) {
+    try {
+      const client = tx || prisma;
+
+      const stock = await client.product.update({
+        where: { id: productId },
+        data: {
+          stock: {
+            decrement: quantity
+          }
+        }
+      });
+
+      return stock;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async checkStock(
+    productId: number, quantity: number,
+    tx?: Prisma.TransactionClient | PrismaClient) {
+    try {
+      const client = tx || prisma;
+      const product = await client.product.findUnique({
+        where: { id: productId },
+        select: { stock: true }
+      });
+
+      if (!product) {
+        throw new ErrorHandler(404, `Product ${productId} not found`);
+      }
+
+      if (product.stock < quantity) {
+        throw new ErrorHandler(400, `Stock not enough for product ${productId}`);
+      }
+
+      return product;
+    } catch (error) {
+      throw error;
     };
   };
 

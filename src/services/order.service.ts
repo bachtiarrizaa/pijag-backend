@@ -6,7 +6,6 @@ import { OrderUtils } from "../utils/order.utils";
 import { Decimal } from "@prisma/client/runtime/library";
 import { ProductRepository } from "../repositories/product.repository";
 import { DiscountUtils } from "../utils/discount.utils";
-import prisma from "../config/prisma.config";
 import { OrderRepository } from "../repositories/order.repository";
 import { OrderItemRequest } from "../types/order-item.";
 

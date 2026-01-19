@@ -6,8 +6,8 @@ import { OrderItemRequest } from "../types/order-item.";
 export class OrderItemRepository {
   static async createMany(
     payload: OrderItemRequest[],
-    orderId: number, tx?:
-    Prisma.TransactionClient | PrismaClient
+    orderId: number,
+    tx: Prisma.TransactionClient | PrismaClient
   ) {
     try {
       const client = tx || prisma;
