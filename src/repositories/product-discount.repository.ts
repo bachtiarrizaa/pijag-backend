@@ -1,5 +1,5 @@
 import prisma from "../config/prisma.config";
-import { ProductDiscountCreateRequest } from "../types/product-discount";
+import { ProductDiscountCreateRequest, ProductDiscountUpdateRequest } from "../types/product-discount";
 import { ErrorHandler } from "../utils/error.utils";
 
 export class ProductDiscountRepository {
@@ -21,10 +21,10 @@ export class ProductDiscountRepository {
     try {
       const productDiscounts = await prisma.productDiscount.findMany({
         orderBy: { id: "desc" },
-        include: {
-          product: true,
-          discount: true
-        }
+        // include: {
+        //   product: true,
+        //   discount: true
+        // }
       });
       return productDiscounts;
     } catch (error) {
@@ -69,12 +69,12 @@ export class ProductDiscountRepository {
     };
   };
 
-  static async deactivateOtherDiscounts(productId: number, discountIdToActivate: number) {
+  static async deactivateOtherDiscounts(productId: number, excludeId: number) {
     try {
       const productDiscount = await prisma.productDiscount.updateMany({
         where: {
           productId,
-          discountId: { not: discountIdToActivate },
+          id: { not: excludeId },
           isActive: true
         },
         data: { isActive: false }
@@ -91,12 +91,27 @@ export class ProductDiscountRepository {
         data: {
           productId: payload.productId,
           discountId: payload.discountId,
-          isActive: true,
+          isActive: payload.isActive,
         },
       });
       return productDiscount;
     } catch (error) {
       throw error;
+    }
+  }
+
+  static async update(productDiscountId: number, payload: ProductDiscountUpdateRequest) {
+    try {
+      const productDiscount = await prisma.productDiscount.update({
+        where: { id: productDiscountId },
+        data: {
+          discountId: payload.discountId,
+          isActive: payload.isActive
+        }
+      });
+      return productDiscount;
+    } catch (error) {
+      throw error
     }
   }
 
