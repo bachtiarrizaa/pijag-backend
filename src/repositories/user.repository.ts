@@ -1,8 +1,8 @@
 import prisma from "../config/prisma.config";
-import { Register } from "../types/auth/auth";
+import { RegisterRequest } from "../types/auth";
 
 export class UserRepository{
-  static async create (payload: Register, hashedPassword: string) {
+  static async create (payload: RegisterRequest, hashedPassword: string) {
     try {
       const user = await prisma.user.create({
         data: {
@@ -10,7 +10,7 @@ export class UserRepository{
           username: payload.username,
           email: payload.email,
           password: hashedPassword,
-          roleId: 1
+          roleId: 3
         },
         include: {
           role: true
@@ -55,6 +55,41 @@ export class UserRepository{
           username,
           NOT: { id: userId }
         }
+      });
+      return user;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async findUsername(username: string) {
+    try {
+      const existingUsername = await prisma.user.findUnique({
+        where: { username }
+      });
+      return existingUsername;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async findEmail(email: string) {
+    try {
+      const existingEmail = await prisma.user.findUnique({
+        where: { email }
+      });
+
+      return existingEmail;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async findUser(email: string) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email },
+        include: { role: true }
       });
       return user;
     } catch (error) {

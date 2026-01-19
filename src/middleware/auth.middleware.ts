@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ErrorHandler } from "../utils/error.utils";
-import prisma from "../config/prisma.config";
 import { verifyAccessToken } from "../utils/jwt.util";
+import { BlacklistTokenRepository } from "../repositories/blacklist-token.repository";
 
 export class AuthMiddleware {
   static authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
@@ -16,9 +16,7 @@ export class AuthMiddleware {
         throw new ErrorHandler(401, "Unauthorized: Token missing");
       };
 
-      const isBlacklisted = await prisma.blacklistToken.findFirst({
-        where: { token }
-      });
+      const isBlacklisted = await BlacklistTokenRepository.findBlacklistToken(token);
       if (isBlacklisted) {
         throw new ErrorHandler(401, "Token has been revoked");
       };

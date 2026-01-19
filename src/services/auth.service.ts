@@ -1,26 +1,22 @@
-import prisma from "../config/prisma.config";
 import bcrypt from "bcrypt";
 import { UserRepository } from "../repositories/user.repository";
-import { Login, Register } from "../types/auth/auth";
+import { LoginRequest, RegisterRequest } from "../types/auth";
 import { ErrorHandler } from "../utils/error.utils";
 import { CustomerRepository } from "../repositories/customer.repository";
 import { generateAccessToken, verifyAccessToken } from "../utils/jwt.util";
+import { BlacklistTokenRepository } from "../repositories/blacklist-token.repository";
 
 export class AuthService {
-  async register (payload: Register) {
+  static async register (payload: RegisterRequest) {
     try {
       const { username, email, password } = payload;
       
-      const existingUsername = await prisma.user.findUnique({
-        where: { username }
-      });
+      const existingUsername = await UserRepository.findUsername(username);
       if (existingUsername) {
         throw new ErrorHandler(400, "Username already exist");
       }
 
-      const existingEmail = await prisma.user.findUnique({
-        where: { email }
-      });
+      const existingEmail = await UserRepository.findEmail(email);
       if (existingEmail) {
         throw new ErrorHandler(400, "Email already exist");
       };
@@ -38,14 +34,11 @@ export class AuthService {
     };
   };
 
-  async login (payload: Login) {
+  static async login (payload: LoginRequest) {
     try {
       const { email, password } = payload;
 
-      const user = await prisma.user.findUnique({
-        where: { email },
-        include: { role: true },
-      });
+      const user = await UserRepository.findUser(email)
       if (!user) {
         throw new ErrorHandler(404, "User not found");
       };
@@ -77,28 +70,24 @@ export class AuthService {
     };
   };
 
-  async logout (token: string) {
+  static async logout (token: string) {
     try {
-      const existingToken = await prisma.blacklistToken.findFirst({
-        where: { token }
-      });
-      if (existingToken) {
-        throw new ErrorHandler(409, "Token already blacklisted");
+      const isBlacklisted = await BlacklistTokenRepository.findBlacklistToken(token);
+      if (isBlacklisted) {
+        throw new ErrorHandler(401, "Token has been revoked");
       };
 
       let decoded;
       try {
         decoded = verifyAccessToken(token);
       } catch {
-        throw new ErrorHandler(409, "Invalid or expired token")
+        throw new ErrorHandler(401, "Invalid or expired token")
       };
 
-      await prisma.blacklistToken.create({
-        data: {
-          token,
-          expiredAt: new Date(decoded.exp! * 1000),
-        },
-      });
+      await BlacklistTokenRepository.create(
+        token,
+        new Date(decoded.exp! * 1000)
+      );
     } catch (error: any) {
       throw error;
     };
