@@ -216,7 +216,7 @@ model Order {
   orderItems    OrderItem[]
   payments      Payment[]
   transactions  Transaction[]
-  voucher       Voucher?     @relation(fields: [voucherId], references: [id])
+  voucher       Voucher?     @relation(fields: [voucherId], references: [id], onDelete: Cascade)
 
   @@index([customerId])
   @@index([cashierId])
@@ -290,8 +290,8 @@ model Transaction {
   updatedAt   DateTime        @updatedAt @map("updated_at")
 
   shift       Shift           @relation(fields: [shiftId], references: [id], onDelete: Cascade)
-  order       Order?          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  payment     Payment?        @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payment     Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
   @@index([shiftId])
   @@index([orderId])
@@ -329,6 +329,7 @@ model Voucher {
   updatedAt   DateTime      @updatedAt
 
   orders      Order[]
+  @@map("vouchers")
 }
 
 

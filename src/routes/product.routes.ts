@@ -1,5 +1,4 @@
 import { Router } from "express";
-// import { uploadImgProduct } from "../middleware/uploadImg.middleware";
 import { AuthMiddleware } from "../middleware/auth.middleware";
 import { ProductController } from "../controllers/product.controller";
 import { UploadImgMiddleware } from "../middleware/upload.middleware";

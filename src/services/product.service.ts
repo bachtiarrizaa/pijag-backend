@@ -31,6 +31,10 @@ export class ProductService{
         throw new ErrorHandler(409, "Product already exist");
       };
 
+      if (!productData.image) {
+        throw new ErrorHandler(400, "Image cannot be empty");
+      };
+
       const product = await ProductRepository.create(productData);
       return product;
     } catch (error) {

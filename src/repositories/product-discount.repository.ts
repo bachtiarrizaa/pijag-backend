@@ -21,6 +21,10 @@ export class ProductDiscountRepository {
     try {
       const productDiscounts = await prisma.productDiscount.findMany({
         orderBy: { id: "desc" },
+        include: {
+          product: true,
+          discount: true
+        }
       });
       return productDiscounts;
     } catch (error) {

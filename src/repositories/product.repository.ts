@@ -71,10 +71,12 @@ export class ProductRepository {
 
   static async findProductById(productId: number) {
     try {
-      const now = new Date();
       const product = await prisma.product.findFirst({
         where: { id: productId },
-        include: this.activeDiscount
+        include: {
+          category: true,
+          ...this.activeDiscount
+        }
       });
       return product;
     } catch (error) {
@@ -100,7 +102,10 @@ export class ProductRepository {
         orderBy: {
           createdAt: "desc"
         },
-        include: this.activeDiscount
+        include: {
+          ...this.activeDiscount,
+          category: true,
+        },
       });
       return products;
     } catch (error) {
