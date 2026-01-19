@@ -1,8 +1,8 @@
 import prisma from "../config/prisma.config";
-import { RegisterRequest } from "../types/auth";
+import { UserCreateRequest } from "../types/user";
 
 export class UserRepository{
-  static async create (payload: RegisterRequest, hashedPassword: string) {
+  static async create (payload: UserCreateRequest, hashedPassword: string) {
     try {
       const user = await prisma.user.create({
         data: {
@@ -10,7 +10,7 @@ export class UserRepository{
           username: payload.username,
           email: payload.email,
           password: hashedPassword,
-          roleId: 3
+          roleId: 1
         },
         include: {
           role: true

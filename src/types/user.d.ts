@@ -3,8 +3,19 @@ export interface User {
   name: string,
   username: string,
   email: string,
-  phoneNumber: string,
+  phoneNumber: string | null,
   birthDate: string | null
+}
+
+export interface UserCreateRequest {
+  avatar?: string | null,
+  name: string,
+  username: string,
+  email: string,
+  password: string,
+  roleId: number,
+  phoneNumber?: string | null,
+  birthDate?: string | null
 }
 
 export interface UserUpdateRequest {
@@ -12,6 +23,6 @@ export interface UserUpdateRequest {
   name: string,
   username: string,
   email: string,
-  phoneNumber: string,
+  phoneNumber: string | null,
   birthDate: string | null
 }

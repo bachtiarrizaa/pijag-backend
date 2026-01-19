@@ -30,12 +30,12 @@ export class ProfileService {
       };
 
       const profileData: User = {
-        avatar: payload.avatar,
+        avatar: payload.avatar ?? null,
         name: payload.name,
         username: payload.username,
         email: payload.email,
-        phoneNumber: payload.phoneNumber,
-        birthDate: payload.birthDate
+        phoneNumber: payload.phoneNumber ?? null,
+        birthDate: payload.birthDate ?? null
       };
 
       if (profileData.email) {
