@@ -11,13 +11,13 @@ export class ProfileService {
         throw new ErrorHandler(404, "User not found");
       };
 
-      return user;
-      // return {
-      //   ...user,
-      //   birthDate: user.birthDate
-      //     ? user.birthDate.toISOString().split("T")[0]
-      //     : null,
-      // };
+      // return user;
+      return {
+        ...user,
+        birthDate: user.birthDate
+          ? user.birthDate.toISOString().split("T")[0]
+          : null,
+      };
     } catch (error) {
       throw error;
     };
@@ -36,7 +36,7 @@ export class ProfileService {
         username: payload.username,
         email: payload.email,
         phoneNumber: payload.phoneNumber ?? null,
-        birthDate: payload.birthDate ? new Date(payload.birthDate) : null 
+        birthDate: payload.birthDate ?? null 
       };
 
       if (profileData.email) {

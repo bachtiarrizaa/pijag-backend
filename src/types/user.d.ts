@@ -15,7 +15,7 @@ export interface UserCreateRequest {
   password: string,
   roleId: number,
   phoneNumber?: string | null,
-  birthDate?: string | null
+  birthDate?: Date | null
 }
 
 export interface UserUpdateRequest {
@@ -26,7 +26,7 @@ export interface UserUpdateRequest {
   password: string,
   roleId?: number | null,
   phoneNumber?: string | null,
-  birthDate?: string | null
+  birthDate?: Date | null
 }
 
 // export interface UserUpdateRequest {
