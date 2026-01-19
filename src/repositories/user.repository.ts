@@ -1,5 +1,5 @@
 import prisma from "../config/prisma.config";
-import { UserCreateRequest } from "../types/user";
+import { UserCreateRequest, UserUpdateRequest } from "../types/user";
 
 export class UserRepository{
   static async create (payload: UserCreateRequest, hashedPassword: string) {

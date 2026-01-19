@@ -1,5 +1,5 @@
 import prisma from "../config/prisma.config";
-import { User } from "../types/user";
+import { ProfileUpdateRequest } from "../types/profile";
 
 export class ProfileRepository {
   static async findProfileUser(userId: number) {
@@ -14,16 +14,16 @@ export class ProfileRepository {
     };
   };
 
-  static async update(userId: number, payload: User) {
+  static async update(userId: number, payload: ProfileUpdateRequest) {
     try {
       const user = await prisma.user.update({
         where: { id: userId },
         data: {
-          avatar: payload.avatar,
+          avatar: payload.avatar ?? null,
           name: payload.name,
           username: payload.username,
           email: payload.email,
-          phoneNumber: payload.phoneNumber,
+          phoneNumber: payload.phoneNumber ?? null,
           birthDate: payload.birthDate ? new Date(payload.birthDate) : null 
         }
       });

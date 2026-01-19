@@ -1,6 +1,6 @@
 import { ProfileRepository } from "../repositories/profile.repository";
 import { UserRepository } from "../repositories/user.repository";
-import { User } from "../types/user";
+import { User, UserUpdateRequest } from "../types/user";
 import { ErrorHandler } from "../utils/error.utils";
 
 export class ProfileService {
@@ -11,18 +11,19 @@ export class ProfileService {
         throw new ErrorHandler(404, "User not found");
       };
 
-      return {
-        ...user,
-        birthDate: user.birthDate
-          ? user.birthDate.toISOString().split("T")[0]
-          : null,
-      };
+      return user;
+      // return {
+      //   ...user,
+      //   birthDate: user.birthDate
+      //     ? user.birthDate.toISOString().split("T")[0]
+      //     : null,
+      // };
     } catch (error) {
       throw error;
     };
   };
 
-  static async update(userId: number, payload: User) {
+  static async update(userId: number, payload: UserUpdateRequest) {
     try {
       const findUser = await UserRepository.findUserById(userId);
       if (!findUser) {

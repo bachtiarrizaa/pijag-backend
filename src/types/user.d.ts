@@ -19,10 +19,21 @@ export interface UserCreateRequest {
 }
 
 export interface UserUpdateRequest {
-  avatar: string | null,
+  avatar?: string | null,
   name: string,
   username: string,
   email: string,
-  phoneNumber: string | null,
-  birthDate: string | null
+  password: string,
+  roleId?: number | null,
+  phoneNumber?: string | null,
+  birthDate?: string | null
 }
+
+// export interface UserUpdateRequest {
+//   avatar: string | null,
+//   name: string,
+//   username: string,
+//   email: string,
+//   phoneNumber: string,
+//   birthDate: string | null
+// }
