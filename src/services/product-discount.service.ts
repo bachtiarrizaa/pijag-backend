@@ -52,60 +52,18 @@ export class ProductDiscountService {
     }
   }
 
-  // static async update(productDiscountId: number, payload: ProductDiscountUpdateRequest) {
-  //   try {
-  //     const productDiscountData: ProductDiscount = {
-  //       productId: payload.productId,
-  //       discountId: payload.discountId,
-  //       isActive: payload.isActive
-  //     }
-
-  //     const findProductDiscount = await ProductDiscountRepository.findProductDiscountById(productDiscountId);
-  //     if (!findProductDiscount) {
-  //       throw new ErrorHandler(404, "Product discount not found");
-  //     }
-
-  //     const discount = await DiscountRepository.findDiscountIsActive(productDiscountData.discountId);
-  //     if (!discount) {
-  //       throw new ErrorHandler(400, "Discount not active or expired");
-  //     }
-
-  //     const existing = await ProductDiscountRepository.findProductAndDiscount(findProductDiscount.productId, productDiscountData.discountId);
-
-  //     let updatedRow;
-  //     if (existing) {
-  //       updatedRow = await ProductDiscountRepository.updateStatus(existing.id, true);
-  //     } else {
-  //       updatedRow = await ProductDiscountRepository.create({
-  //         productId: findProductDiscount.productId,
-  //         discountId: productDiscountData.discountId,
-  //         isActive: true
-  //       });
-  //     }
-
-  //     await ProductDiscountRepository.deactivateOtherDiscounts(findProductDiscount.productId, productDiscountData.discountId);
-
-  //     return updatedRow;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
-
   static async update(productDiscountId: number, payload: ProductDiscountUpdateRequest) {
     try {
-      // 1️⃣ Cari row yang ingin diupdate
       const productDiscount = await ProductDiscountRepository.findProductDiscountById(productDiscountId);
       if (!productDiscount) {
         throw new ErrorHandler(404, "Product discount not found");
       }
 
-      // 2️⃣ Pastikan discount baru aktif
       const discount = await DiscountRepository.findDiscountIsActive(payload.discountId);
       if (!discount) {
         throw new ErrorHandler(400, "Discount not active or expired");
       }
 
-      // 3️⃣ Cek apakah kombinasi product + discount baru sudah ada (kecuali row ini sendiri)
       const existing = await ProductDiscountRepository.findProductAndDiscount(
         productDiscount.productId,
         payload.discountId
@@ -114,13 +72,11 @@ export class ProductDiscountService {
         throw new ErrorHandler(409, "Product already has this discount");
       }
 
-      // 4️⃣ Update row: discountId + isActive
       const updatedRow = await ProductDiscountRepository.update(productDiscountId, {
         discountId: payload.discountId,
         isActive: true
       });
 
-      // 5️⃣ Nonaktifkan discount lain untuk product yang sama
       await ProductDiscountRepository.deactivateOtherDiscounts(productDiscount.productId, productDiscountId);
 
       return updatedRow;

@@ -1,4 +1,3 @@
-import { Decimal } from "@prisma/client/runtime/library";
 import prisma from "../config/prisma.config";
 import { CartItemCreateRequest, CartItemUpdateQuantity, CartItemUpdateRequest } from "../types/cart-item";
 

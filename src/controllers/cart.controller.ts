@@ -62,11 +62,18 @@ export class CartController {
 
       const payload = req.body as CartUpdateRequest;
 
-      const updateItem = await CartService.updateItem(cartItemId, payload);
+      const updatedItem = await CartService.updateItem(cartItemId, payload);
+      if (!updatedItem) {
+        return res.status(200).json({
+          success: true,
+          message: "Item removed from cart successfully",
+          data: null
+        })
+      }
       res.status(200).json({
         success: true,
         message: "Item update successfully",
-        data: updateItem
+        data: updatedItem
       });
     } catch (error) {
       next(error);
@@ -83,7 +90,7 @@ export class CartController {
       const deleteItem = await CartService.delete(cartItemId);
       res.status(200).json({
         success: true,
-        message: "Cart item delete successfully",
+        message: "Item removed from cart successfully",
       });
     } catch (error) {
       next(error);
