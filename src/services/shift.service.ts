@@ -5,16 +5,21 @@ import { ErrorHandler } from "../utils/error.utils";
 export class ShiftService{
   static async openShift(userId: number, payload: ShiftCreateRequest) {
     try {
+      const openShiftData = {
+        cashStart: payload.cashStart,
+        notes: payload.notes ?? null
+      };
+
       const findOpenShift = await ShiftRepository.findOpenShift(userId);
       if (findOpenShift) {
         throw new ErrorHandler(404, "You still have an active shift");
       };
 
-      if (!payload.cashStart) {
+      if (!openShiftData.cashStart) {
         throw new ErrorHandler(400, "Cash start is required");
       };
 
-      const openShift = await ShiftRepository.create(userId, payload);
+      const openShift = await ShiftRepository.create(userId, openShiftData);
       return openShift;
     } catch (error) {
       throw error;
@@ -23,16 +28,21 @@ export class ShiftService{
 
   static async closeShift(userId: number, payload: ShiftUpdateRequest) {
     try {
+      const closedShiftData = {
+        cashEnd: payload.cashEnd,
+        notes: payload.notes ?? null
+      }
+
       const findOpenShift = await ShiftRepository.findOpenShift(userId);
       if (!findOpenShift) {
         throw new ErrorHandler(404, "No active shift found!");
       };
 
-      if (!payload.cashEnd) {
+      if (!closedShiftData.cashEnd) {
         throw new ErrorHandler(400, "Cash end is required");
       };
 
-      const closeShift = await ShiftRepository.closeShift(findOpenShift.id, payload);
+      const closeShift = await ShiftRepository.closeShift(findOpenShift.id, closedShiftData);
       return closeShift;
     } catch (error) {
       throw error;
