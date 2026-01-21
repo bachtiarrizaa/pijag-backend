@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { UserRepository } from "../repositories/user.repository";
-import { Login, LoginRequest, Register, RegisterRequest } from "../types/auth";
+import { Login, LoginRequest, Register } from "../types/auth";
 import { ErrorHandler } from "../utils/error.utils";
 import { CustomerRepository } from "../repositories/customer.repository";
 import { generateAccessToken, verifyAccessToken } from "../utils/jwt.util";
@@ -57,7 +57,6 @@ export class AuthService {
       if (!user.roleId || !user.role?.name) {
         throw new ErrorHandler(404, "User role is not properly assigned");
       };
-
 
       const isPasswordValid = await bcrypt.compare(loginData.password, user.password);
       if (!isPasswordValid) {

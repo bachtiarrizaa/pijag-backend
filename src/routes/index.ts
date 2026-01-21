@@ -8,7 +8,8 @@ import productRoutes from "./product.routes";
 import productDiscountRoutes from "./prouductDiscount.routes";
 import cartRoutes from './cart.routes';
 import shiftRoutes from "./shift.routes";
-import orderRoutes from "./order.routes"
+import orderRoutes from "./order.routes";
+import wishlistRoutes from "./wishlist.routes";
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use("/product-discount", productDiscountRoutes);
 router.use("/cart", cartRoutes);
 router.use("/cashier", shiftRoutes)
 router.use("/order", orderRoutes);
+router.use("/wishlist", wishlistRoutes);
 
 export default router;
