@@ -1,12 +1,14 @@
 import { OrderSource } from "@prisma/client";
-import { CreateOrderRequest } from "../types/order";
-import { ShiftRepository } from "../repositories/shift.repository";
-import { ErrorHandler } from "../utils/error.utils";
-import { OrderUtils } from "../utils/order.utils";
 import { Decimal } from "@prisma/client/runtime/library";
+import prisma from "../config/prisma.config";
+import { CreateOrderRequest } from "../types/order";
+import { OrderRepository } from "../repositories/order.repository";
+import { OrderItemRepository } from "../repositories/order-iitem.repository";
 import { ProductRepository } from "../repositories/product.repository";
 import { DiscountUtils } from "../utils/discount.utils";
-import { OrderRepository } from "../repositories/order.repository";
+import { OrderUtils } from "../utils/order.utils";
+import { ShiftRepository } from "../repositories/shift.repository";
+import { ErrorHandler } from "../utils/error.utils";
 import { OrderItemRequest } from "../types/order-item.";
 
 export class OrderService {
@@ -16,30 +18,30 @@ export class OrderService {
 
       if (source === OrderSource.cashier && cashierId !== null) {
         const activeShift = await ShiftRepository.findOpenShift(cashierId);
-        if (!activeShift) {
-          throw new ErrorHandler(403, "Cashier has no active shift");
-        };
+        if (!activeShift) throw new ErrorHandler(403, "Cashier has no active shift");
       }
 
-      if (source === OrderSource.customer) {
-        if (!payload.customerId) {
-          throw new ErrorHandler(400, "customerId is required for customer order");
-        }
+      if (source === OrderSource.customer && !payload.customerId) {
+        throw new ErrorHandler(400, "customerId is required for customer order");
       }
 
       if (!payload.items || payload.items.length === 0) {
         throw new ErrorHandler(400, "Items cannot be empty");
-      };
+      }
 
       const orderCode = await OrderUtils.generateOrderCode(source);
-      
-      let total = new Decimal(0);
-      const validatedItems = await Promise.all(
-        payload.items.map( async(item: OrderItemRequest) => {
+
+      return await prisma.$transaction(async (tx) => {
+        let total = new Decimal(0);
+        const validatedItems: OrderItemRequest[] = [];
+
+        for (const item of payload.items) {
           const product = await ProductRepository.findProductById(item.productId);
-          if (!product) {
-            throw new ErrorHandler(404, "Product not found");
-          };
+          if (!product) throw new ErrorHandler(404, "Product not found");
+
+          if (product.stock < item.quantity) {
+            throw new ErrorHandler(400, `Stock not enough for product ${item.productId}`);
+          }
 
           const pricedProduct = DiscountUtils.calculateDiscount(product);
           const finalPrice = pricedProduct.finalPrice;
@@ -47,34 +49,37 @@ export class OrderService {
 
           total = total.add(subtotal);
 
-          return {
-            productId: pricedProduct.id,
+          validatedItems.push({
+            productId: product.id,
             quantity: item.quantity,
             price: finalPrice,
             subtotal
-          };
-        })
-      );
+          });
 
-      const orderData: CreateOrderRequest = {
-        customerId: payload.customerId ?? null,
-        cashierId: cashierId ?? null,
-        orderCode,
-        source,
-        total,
-        finalTotal: total,
-        items: validatedItems
-      };
+          await ProductRepository.decrementStock(product.id, item.quantity, tx);
+        }
 
-      const createdOrder = await OrderRepository.create(orderData);
+        const itemData = {
+          customerId: payload.customerId ?? null,
+          cashierId: cashierId ?? null,
+          orderCode,
+          source,
+          total,
+          finalTotal: total,
+          items: validatedItems
+        }
+        const order = await OrderRepository.create(itemData, tx);
 
-      return {
-        order: createdOrder,
-        items: validatedItems,
-        total
-      };
+        await OrderItemRepository.createMany(validatedItems, order.id, tx);
+
+        return {
+          ...order,
+          items: validatedItems,
+        };
+      });
     } catch (error) {
       throw error;
-    };
-  };
+    }
+  }
 }
+

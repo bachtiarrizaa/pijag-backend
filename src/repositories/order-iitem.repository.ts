@@ -1,17 +1,13 @@
-import { Prisma, PrismaClient } from "@prisma/client";
-import prisma from "../config/prisma.config";
+import { Prisma } from "@prisma/client";
 import { OrderItemRequest } from "../types/order-item.";
-
 
 export class OrderItemRepository {
   static async createMany(
     payload: OrderItemRequest[],
     orderId: number,
-    tx: Prisma.TransactionClient | PrismaClient
+    tx: Prisma.TransactionClient
   ) {
     try {
-      const client = tx || prisma;
-
       const orderItemsData = payload.map(item => ({
         orderId,
         productId: item.productId,
@@ -20,13 +16,12 @@ export class OrderItemRepository {
         subtotal: item.subtotal
       }));
 
-      const orderItems = await client.orderItem.createMany({
+      const order = await tx.orderItem.createMany({
         data: orderItemsData
       });
-
-      return orderItems;
+      return order;
     } catch (error) {
       throw error;
     };
-  };
+  }
 }

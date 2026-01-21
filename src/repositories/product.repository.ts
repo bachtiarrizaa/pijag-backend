@@ -49,11 +49,9 @@ export class ProductRepository {
 
   static async decrementStock(
     productId: number, quantity: number,
-    tx?: Prisma.TransactionClient | PrismaClient) {
+    tx: Prisma.TransactionClient) {
     try {
-      const client = tx || prisma;
-
-      const stock = await client.product.update({
+      const stock = await tx.product.update({
         where: { id: productId },
         data: {
           stock: {
@@ -70,10 +68,9 @@ export class ProductRepository {
 
   static async checkStock(
     productId: number, quantity: number,
-    tx?: Prisma.TransactionClient | PrismaClient) {
+    tx: Prisma.TransactionClient) {
     try {
-      const client = tx || prisma;
-      const product = await client.product.findUnique({
+      const product = await tx.product.findUnique({
         where: { id: productId },
         select: { stock: true }
       });

@@ -12,7 +12,7 @@ export class ShiftService{
 
       const findOpenShift = await ShiftRepository.findOpenShift(userId);
       if (findOpenShift) {
-        throw new ErrorHandler(404, "You still have an active shift");
+        throw new ErrorHandler(400, "You still have an active shift");
       };
 
       if (!openShiftData.cashStart) {
