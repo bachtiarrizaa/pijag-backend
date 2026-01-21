@@ -10,6 +10,7 @@ import { OrderUtils } from "../utils/order.utils";
 import { ShiftRepository } from "../repositories/shift.repository";
 import { ErrorHandler } from "../utils/error.utils";
 import { OrderItemRequest } from "../types/order-item.";
+import { CustomerRepository } from "../repositories/customer.repository";
 
 export class OrderService {
   static async create(cashierId: number | null, payload: CreateOrderRequest) {
@@ -18,11 +19,20 @@ export class OrderService {
 
       if (source === OrderSource.cashier && cashierId !== null) {
         const activeShift = await ShiftRepository.findOpenShift(cashierId);
-        if (!activeShift) throw new ErrorHandler(403, "Cashier has no active shift");
+        if (!activeShift) {
+          throw new ErrorHandler(403, "Cashier has no active shift");
+        }
       }
-
+      
       if (source === OrderSource.customer && !payload.customerId) {
         throw new ErrorHandler(400, "customerId is required for customer order");
+      }
+
+      if (payload.customerId) {
+        const customer = await CustomerRepository.findByCustomerId(payload.customerId);
+        if (!customer) {
+          throw new ErrorHandler(404, `Customer with id ${payload.customerId} not found`);
+        }
       }
 
       if (!payload.items || payload.items.length === 0) {
