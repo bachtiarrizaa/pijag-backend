@@ -27,6 +27,31 @@ export class WishlistRepository {
     };
   };
 
+  static async findWishlists(customerId: number) {
+    try {
+      const wishlists = await prisma.wishlist.findMany({
+        where: { customerId },
+        orderBy: {
+          createdAt: "desc"
+        },
+        // include: {
+        //   product: true
+        // }
+        // include: {
+        //   product: {
+        //     include: { 
+        //       category: true,
+        //       discounts: true
+        //     }
+        //   }
+        // }
+      });
+      return wishlists
+    } catch (error) {
+      throw error;
+    };
+  };
+
   static async create(customerId: number, payload: WishlistCreateRequest) {
     try {
       const wishlist = await prisma.wishlist.create({

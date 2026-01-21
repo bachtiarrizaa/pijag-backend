@@ -2,6 +2,7 @@ import { WishlistRepository } from "../repositories/wishlist.repository";
 import { WishlistCreateRequest } from "../types/wishlist";
 import { ErrorHandler } from "../utils/error.utils";
 import { ProductRepository } from "../repositories/product.repository";
+import { DiscountUtils } from "../utils/discount.utils";
 
 export class WishlistService {
   static async create(customerId: number, payload: WishlistCreateRequest) {
@@ -28,6 +29,41 @@ export class WishlistService {
       return wishlist;
     } catch (error) {
       throw error
+    };
+  };
+
+  static async getWishlists(customerId: number) {
+    try {
+      const wishlists = await WishlistRepository.findWishlists(customerId);
+
+      if (!wishlists || wishlists.length === 0) return [];
+
+      const productIds = wishlists.map(item => item.productId);
+      const products = await ProductRepository.findProductByIds(productIds);
+
+      const productMap = new Map(products.map(p => [p.id, p]));
+
+      const updatedWishlist = wishlists.map(item => {
+        const product = productMap.get(item.productId);
+        if (!product) {
+          throw new ErrorHandler(404, `Product with id ${item.productId} not found`);
+        }
+
+        const pricedProduct = DiscountUtils.calculateDiscount(product);
+        const finalPrice = pricedProduct.finalPrice;
+
+        return {
+          ...item,
+          product: {
+            ...product,
+            finalPrice,
+          }
+        };
+      });
+
+      return updatedWishlist;
+    } catch (error) {
+      throw error;
     };
   };
 

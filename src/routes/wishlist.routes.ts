@@ -6,6 +6,7 @@ const router = Router();
 
 router.use(AuthMiddleware.isCustomer);
 
+router.get("/", WishlistController.getWishlists);
 router.post("/", WishlistController.create);
 router.delete("/:id", WishlistController.delete);
 

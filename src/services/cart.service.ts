@@ -3,7 +3,7 @@ import { CartItemRepository } from "../repositories/cart-item.repository";
 import { CartRepository } from "../repositories/cart.repository";
 import { CustomerRepository } from "../repositories/customer.repository";
 import { ProductRepository } from "../repositories/product.repository";
-import { Cart, CartCreateRequest, CartQuantity, CartUpdateRequest } from "../types/cart";
+import { CartCreateRequest, CartUpdateRequest } from "../types/cart";
 import { DiscountUtils } from "../utils/discount.utils";
 import { ErrorHandler } from "../utils/error.utils";
 import { CartItem } from "../types/cart-item";
@@ -42,6 +42,7 @@ export class CartService{
           subtotal,
           product: {
             ...product,
+            finalprice: finalPrice,
             discounts: pricedProduct.discount
           }
         };

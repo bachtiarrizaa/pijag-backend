@@ -131,7 +131,10 @@ export class ProductRepository {
     try {
       const products = await prisma.product.findMany({
         where: { id: { in: productIds } },
-        include: this.activeDiscount
+        include: {
+          ...this.activeDiscount,
+          category: true
+        }
       });
       return products;
     } catch (error) {
