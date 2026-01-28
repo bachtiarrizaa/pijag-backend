@@ -319,6 +319,7 @@ model Review {
 model Voucher {
   id          Int           @id @default(autoincrement())
   name        String        @db.VarChar(100)
+  description String?       @db.Text
   type        DiscountType                  
   value       Decimal       @db.Decimal(10,2)
   minOrder    Decimal?      @db.Decimal(10,2) @map("min_order")

@@ -74,7 +74,7 @@ export class DiscountService {
         throw new ErrorHandler(404, "Discount not found");
       };
 
-      if (discountData.name && payload.name.trim() === "") {
+      if (discountData.name && discountData.name.trim() === "") {
         const existing = await DiscountRepository.findDiscountByName(discountData.name, discountId);
         if (existing) {
           throw new ErrorHandler(409, "Discount Name already exist");
