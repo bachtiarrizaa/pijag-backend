@@ -216,7 +216,7 @@ model Order {
   orderItems    OrderItem[]
   payments      Payment[]
   transactions  Transaction[]
-  voucher       Voucher?     @relation(fields: [voucherId], references: [id])
+  voucher       Voucher?     @relation(fields: [voucherId], references: [id], onDelete: Cascade)
 
   @@index([customerId])
   @@index([cashierId])
@@ -290,8 +290,8 @@ model Transaction {
   updatedAt   DateTime        @updatedAt @map("updated_at")
 
   shift       Shift           @relation(fields: [shiftId], references: [id], onDelete: Cascade)
-  order       Order?          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  payment     Payment?        @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payment     Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
   @@index([shiftId])
   @@index([orderId])
@@ -319,6 +319,7 @@ model Review {
 model Voucher {
   id          Int           @id @default(autoincrement())
   name        String        @db.VarChar(100)
+  description String?       @db.Text
   type        DiscountType                  
   value       Decimal       @db.Decimal(10,2)
   minOrder    Decimal?      @db.Decimal(10,2) @map("min_order")
@@ -329,6 +330,7 @@ model Voucher {
   updatedAt   DateTime      @updatedAt
 
   orders      Order[]
+  @@map("vouchers")
 }
 
 

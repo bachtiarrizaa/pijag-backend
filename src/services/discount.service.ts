@@ -1,35 +1,42 @@
 import { DiscountRepository } from "../repositories/discount.repository";
-import { DiscountCreateRequest, DiscountType, DiscountUpdateRequest } from "../types/discount";
+import { Discount, DiscountCreateRequest, DiscountType, DiscountUpdateRequest } from "../types/discount";
 import { ErrorHandler } from "../utils/error.utils";
 
 export class DiscountService {
   static async create(payload: DiscountCreateRequest) {
     try {
-      if (!payload.name || payload.name.trim() === "") {
+      const discountData: Discount = {
+        name: payload.name,
+        description: payload.description,
+        type: payload.type,
+        value: payload.value,
+        startDate: payload.startDate ?? null,
+        endDate: payload.endDate ?? null,
+        isActive: payload.isActive
+      }
+
+      if (!discountData.name || discountData.name.trim() === "") {
         throw new ErrorHandler(400, "Name cannot be empty");
       }
 
-      if (!["percent", "fixed"].includes(payload.type)) {
+      if (!["percent", "fixed"].includes(discountData.type)) {
         throw new ErrorHandler(400, "Invalid discount type");
       }
 
-      if (payload.value <= 0) {
+      if (discountData.value <= 0) {
         throw new ErrorHandler(400, "Discount value must be greater than 0");
       }
-      if (payload.type === "percent" && payload.value > 100) {
+      if (discountData.type === "percent" && discountData.value > 100) {
         throw new ErrorHandler(400, "Percent discount cannot exceed 100%");
       }
 
-      if (payload.startDate && payload.endDate) {
-        const start = new Date(payload.startDate);
-        const end = new Date(payload.endDate);
-        
-        if (start >= end) {
+      if (discountData.startDate && discountData.endDate) {
+        if (discountData.startDate >= discountData.endDate) {
           throw new ErrorHandler(400, "Start date must be before end date");
         }
       }
 
-      const discount = await DiscountRepository.create(payload);
+      const discount = await DiscountRepository.create(discountData);
       return discount;
     } catch (error) {
       throw error;
@@ -52,40 +59,47 @@ export class DiscountService {
 
   static async update(discountId: number, payload: DiscountUpdateRequest) {
     try {
+      const discountData: Discount = {
+        name: payload.name,
+        description: payload.description,
+        type: payload.type,
+        value: payload.value,
+        startDate: payload.startDate ?? null,
+        endDate: payload.endDate ?? null,
+        isActive: payload.isActive
+      }
+
       const discount = await DiscountRepository.findDiscountById(discountId);
       if (!discount) {
         throw new ErrorHandler(404, "Discount not found");
       };
 
-      if (payload.name && payload.name.trim() === "") {
-        const existing = await DiscountRepository.findDiscountByName(payload.name, discountId);
+      if (discountData.name && discountData.name.trim() === "") {
+        const existing = await DiscountRepository.findDiscountByName(discountData.name, discountId);
         if (existing) {
           throw new ErrorHandler(409, "Discount Name already exist");
         };
       };
 
-      if (payload.value <= 0) {
+      if (discountData.value <= 0) {
         throw new ErrorHandler(400, "Discount value must be greater than 0");
       };
 
-      if (payload.type && !["percent", "fixed"].includes(payload.type)) {
+      if (discountData.type && !["percent", "fixed"].includes(payload.type)) {
         throw new ErrorHandler(400, "Invalid discount type");
       };
 
-      if (payload.type && payload.value > 100) {
+      if (discountData.type && payload.value > 100) {
         throw new ErrorHandler(400, "Percent discount cannot exceed 100%");
       };
 
-      if (payload.startDate && payload.endDate) {
-        const start = new Date(payload.startDate);
-        const end = new Date(payload.endDate);
-        
-        if (start >= end) {
+      if (discountData.startDate && discountData.endDate) {
+        if (discountData.startDate >= discountData.endDate) {
           throw new ErrorHandler(400, "Start date must be before end date");
         }
       };
 
-      const updateDiscount = await DiscountRepository.update(discountId, payload);
+      const updateDiscount = await DiscountRepository.update(discountId, discountData);
       return updateDiscount;
     } catch (error) {
       throw error;
@@ -95,7 +109,7 @@ export class DiscountService {
   static async delete(discountId: number) {
     try {
       const findDiscount = await DiscountRepository.findDiscountById(discountId);
-      if (!discountId) {
+      if (!findDiscount) {
         throw new ErrorHandler(404, "Discount not found")
       };
 

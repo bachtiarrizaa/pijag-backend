@@ -1,4 +1,4 @@
-import prisma from "../config/prisma.config";
+import { Decimal } from "@prisma/client/runtime/library";
 import { CategoryRepository } from "../repositories/category.repository";
 import { ProductRepository } from "../repositories/product.repository";
 import { Product, ProductCreateRequest, ProductUpdateRequest } from "../types/product";
@@ -12,13 +12,13 @@ export class ProductService{
         categoryId: Number(payload.categoryId),
         name: payload.name,
         description: payload.description,
-        price: payload.price,
+        price: new Decimal(payload.price),
         stock: Number(payload.stock),
         image: payload.image
       };
 
       if (productData.name.trim() === "") {
-        throw new ErrorHandler(404, "Product name cannot be empty");
+        throw new ErrorHandler(400, "Product name cannot be empty");
       };
 
       const categoryExist = await CategoryRepository.findCategoryById(productData.categoryId);
@@ -30,6 +30,18 @@ export class ProductService{
       if (existingProduct) {
         throw new ErrorHandler(409, "Product already exist");
       };
+
+      if (!productData.image) {
+        throw new ErrorHandler(400, "Image cannot be empty");
+      };
+
+      if (productData.stock < 0) {
+        throw new ErrorHandler(400, "Stock cannot be negative");
+      }
+
+      if (productData.price.lte(0)) {
+        throw new ErrorHandler(400, "Price must be greater than 0");
+      }
 
       const product = await ProductRepository.create(productData);
       return product;
@@ -74,8 +86,8 @@ export class ProductService{
         categoryId: Number(payload.categoryId),
         name: payload.name,
         description: payload.description,
+        price: new Decimal(payload.price),
         stock: Number(payload.stock),
-        price: payload.price,
         image: payload.image
       };
 

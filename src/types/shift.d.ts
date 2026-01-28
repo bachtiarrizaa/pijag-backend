@@ -1,17 +1,15 @@
 export interface Shift {
-  cashStart: string;
-  cashEnd: string;
-  notes?: string;
+  cashStart: string,
+  cashEnd: string,
+  notes?: string | null,
 }
 
 export interface ShiftCreateRequest {
-  cashStart: string;
-  // cashEnd: string;
-  notes?: string;
+  cashStart: string,
+  notes?: string | null,
 }
 
 export interface ShiftUpdateRequest {
-  // cashStart: string;
-  cashEnd: string;
-  notes?: string;
+  cashEnd: string,
+  notes?: string | null,
 }

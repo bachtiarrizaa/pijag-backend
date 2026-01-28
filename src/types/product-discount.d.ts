@@ -6,8 +6,10 @@ export interface ProductDiscount {
 export interface ProductDiscountCreateRequest {
   productId: number,
   discountId: number,
-  // isActive: boolean
+  isActive: boolean
 }
 export interface ProductDiscountUpdateRequest {
+  // productId: number,
   discountId: number,
+  isActive: boolean
 }

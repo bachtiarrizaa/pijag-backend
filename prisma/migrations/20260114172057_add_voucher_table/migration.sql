@@ -15,7 +15,7 @@ ALTER TABLE `orders` DROP COLUMN `discount_id`,
     ADD COLUMN `voucher_id` INTEGER NULL;
 
 -- CreateTable
-CREATE TABLE `Voucher` (
+CREATE TABLE `vouchers` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
     `type` ENUM('percent', 'fixed') NOT NULL,
@@ -34,4 +34,4 @@ CREATE TABLE `Voucher` (
 CREATE INDEX `orders_voucher_id_idx` ON `orders`(`voucher_id`);
 
 -- AddForeignKey
-ALTER TABLE `orders` ADD CONSTRAINT `orders_voucher_id_fkey` FOREIGN KEY (`voucher_id`) REFERENCES `Voucher`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `orders` ADD CONSTRAINT `orders_voucher_id_fkey` FOREIGN KEY (`voucher_id`) REFERENCES `vouchers`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

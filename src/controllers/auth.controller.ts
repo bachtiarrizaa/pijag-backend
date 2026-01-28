@@ -1,61 +1,58 @@
-import { Request, Response } from "express";
-import { Login, Register } from "../types/auth/auth";
+import { Request, Response, NextFunction } from "express";
+import { LoginRequest, RegisterRequest } from "../types/auth";
 import { AuthService } from "../services/auth.service";
 
 export class AuthController {
-  async register (req: Request, res: Response) {
+  async register(req: Request, res: Response, next: NextFunction) {
     try {
-      const payload: Register = req.body;
+      const payload = req.body as RegisterRequest;
+      const register = await AuthService.register(payload);
 
-      const authService = new AuthService();
-      const register = await authService.register(payload);
       res.status(201).json({
         success: true,
         message: "Register successfully",
         data: register,
       });
     } catch (error) {
-      throw error;
-    };
-  };
+      next(error);
+    }
+  }
 
-  async login (req: Request, res: Response) {
+  async login (req: Request, res: Response, next: NextFunction) {
     try {
-      const payload: Login = req.body;
+      const payload = req.body as LoginRequest;
 
-      const authService = new AuthService();
-      const login = await authService.login(payload);
-      res.status(201).json({
+      const login = await AuthService.login(payload);
+      res.status(200).json({
         success: true,
         message: "Login successfully",
         data: login,
       });
     } catch (error) {
-      throw error
+      next(error);
     };
   };
 
-  async logout (req: Request, res: Response) {
+  async logout (req: Request, res: Response, next: NextFunction) {
     try {
       const authHeader = req.headers.authorization;
       const token = authHeader && authHeader.split(" ")[1];
 
       if (!token) {
-        return res.status(401).json({
+        return res.status(400).json({
           success: false,
           message: "Token is required for logout",
         });
       }
 
-      const authService = new AuthService();
-      await authService.logout(token);
+      await AuthService.logout(token);
 
       return res.status(200).json({
         success: true,
         message: "Logout successfully",
       });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 }

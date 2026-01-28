@@ -1,51 +1,55 @@
-import prisma from "../config/prisma.config";
 import bcrypt from "bcrypt";
 import { UserRepository } from "../repositories/user.repository";
-import { Login, Register } from "../types/auth/auth";
+import { Login, LoginRequest, Register } from "../types/auth";
 import { ErrorHandler } from "../utils/error.utils";
 import { CustomerRepository } from "../repositories/customer.repository";
 import { generateAccessToken, verifyAccessToken } from "../utils/jwt.util";
+import { BlacklistTokenRepository } from "../repositories/blacklist-token.repository";
+import { UserCreateRequest } from "../types/user";
 
 export class AuthService {
-  async register (payload: Register) {
+  static async register (payload: UserCreateRequest) {
     try {
-      const { username, email, password } = payload;
+      const hashedPassword = await bcrypt.hash(payload.password, 10);
+
+      const registerData: Register = {
+        name: payload.name,
+        username: payload.username,
+        email: payload.email,
+        password: hashedPassword,
+        roleId: payload.roleId
+      }
       
-      const existingUsername = await prisma.user.findUnique({
-        where: { username }
-      });
+      const existingUsername = await UserRepository.findUsername(registerData.username);
       if (existingUsername) {
         throw new ErrorHandler(400, "Username already exist");
       }
 
-      const existingEmail = await prisma.user.findUnique({
-        where: { email }
-      });
+      const existingEmail = await UserRepository.findEmail(registerData.email);
       if (existingEmail) {
         throw new ErrorHandler(400, "Email already exist");
       };
 
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await UserRepository.create(payload, hashedPassword);
+      const user = await UserRepository.create(registerData, hashedPassword);
       
       if (user.role?.name.toLocaleLowerCase() === "customer") {
-        await CustomerRepository.create(user.id);
+        await CustomerRepository.create(user.role?.id);
       };
 
-      // return user;
+      return user;
     } catch (error) {
       throw error;
     };
   };
 
-  async login (payload: Login) {
+  static async login (payload: LoginRequest) {
     try {
-      const { email, password } = payload;
+      const loginData: Login = {
+        email: payload.email,
+        password: payload.password
+      }
 
-      const user = await prisma.user.findUnique({
-        where: { email },
-        include: { role: true },
-      });
+      const user = await UserRepository.findUser(loginData.email)
       if (!user) {
         throw new ErrorHandler(404, "User not found");
       };
@@ -54,8 +58,7 @@ export class AuthService {
         throw new ErrorHandler(404, "User role is not properly assigned");
       };
 
-
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await bcrypt.compare(loginData.password, user.password);
       if (!isPasswordValid) {
         throw new ErrorHandler(401, "invalid password");
       };
@@ -69,7 +72,7 @@ export class AuthService {
       });
 
       return {
-        // user,
+        ...user,
         accessToken
       };
     }  catch (error) {
@@ -77,28 +80,24 @@ export class AuthService {
     };
   };
 
-  async logout (token: string) {
+  static async logout (token: string) {
     try {
-      const existingToken = await prisma.blacklistToken.findFirst({
-        where: { token }
-      });
-      if (existingToken) {
-        throw new ErrorHandler(409, "Token already blacklisted");
+      const isBlacklisted = await BlacklistTokenRepository.findBlacklistToken(token);
+      if (isBlacklisted) {
+        throw new ErrorHandler(401, "Token has been revoked");
       };
 
       let decoded;
       try {
         decoded = verifyAccessToken(token);
       } catch {
-        throw new ErrorHandler(409, "Invalid or expired token")
+        throw new ErrorHandler(401, "Invalid or expired token")
       };
 
-      await prisma.blacklistToken.create({
-        data: {
-          token,
-          expiredAt: new Date(decoded.exp! * 1000),
-        },
-      });
+      await BlacklistTokenRepository.create(
+        token,
+        new Date(decoded.exp! * 1000)
+      );
     } catch (error: any) {
       throw error;
     };

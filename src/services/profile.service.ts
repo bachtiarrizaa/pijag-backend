@@ -1,6 +1,6 @@
 import { ProfileRepository } from "../repositories/profile.repository";
 import { UserRepository } from "../repositories/user.repository";
-import { User } from "../types/user";
+import { User, UserUpdateRequest } from "../types/user";
 import { ErrorHandler } from "../utils/error.utils";
 
 export class ProfileService {
@@ -11,6 +11,7 @@ export class ProfileService {
         throw new ErrorHandler(404, "User not found");
       };
 
+      // return user;
       return {
         ...user,
         birthDate: user.birthDate
@@ -22,7 +23,7 @@ export class ProfileService {
     };
   };
 
-  static async update(userId: number, payload: User) {
+  static async update(userId: number, payload: UserUpdateRequest) {
     try {
       const findUser = await UserRepository.findUserById(userId);
       if (!findUser) {
@@ -30,12 +31,12 @@ export class ProfileService {
       };
 
       const profileData: User = {
-        avatar: payload.avatar,
+        avatar: payload.avatar ?? null,
         name: payload.name,
         username: payload.username,
         email: payload.email,
-        phoneNumber: payload.phoneNumber,
-        birthDate: payload.birthDate
+        phoneNumber: payload.phoneNumber ?? null,
+        birthDate: payload.birthDate ?? null 
       };
 
       if (profileData.email) {

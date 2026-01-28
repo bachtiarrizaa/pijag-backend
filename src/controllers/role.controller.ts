@@ -40,7 +40,7 @@ export class RoleController {
       const payload = req.body as RoleUpdateRequest;
 
       const role = await RoleService.update(roleId, payload);
-      res.status(201).json({
+      res.status(200).json({
         success: true,
         message: "Role update successfully",
         data: role

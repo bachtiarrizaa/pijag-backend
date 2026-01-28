@@ -12,7 +12,7 @@ export class DiscountRepository {
           value: payload.value,
           startDate: payload.startDate ? new Date(payload.startDate) : null,
           endDate: payload.endDate ? new Date(payload.endDate) : null,
-          isActive: payload.isActive ?? true
+          isActive: true
         },
       });
       return discount;

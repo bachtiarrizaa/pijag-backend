@@ -1,6 +1,7 @@
+import { Prisma, PrismaClient } from "@prisma/client";
 import prisma from "../config/prisma.config";
 import { ProductCreateRequest, ProductUpdateRequest } from "../types/product";
-import { DiscountUtils } from "../utils/discount.utils";
+import { ErrorHandler } from "../utils/error.utils";
 
 export class ProductRepository {
   static async findProductByName(name: string) {
@@ -46,6 +47,48 @@ export class ProductRepository {
     };
   };
 
+  static async decrementStock(
+    productId: number, quantity: number,
+    tx: Prisma.TransactionClient) {
+    try {
+      const stock = await tx.product.update({
+        where: { id: productId },
+        data: {
+          stock: {
+            decrement: quantity
+          }
+        }
+      });
+
+      return stock;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async checkStock(
+    productId: number, quantity: number,
+    tx: Prisma.TransactionClient) {
+    try {
+      const product = await tx.product.findUnique({
+        where: { id: productId },
+        select: { stock: true }
+      });
+
+      if (!product) {
+        throw new ErrorHandler(404, `Product ${productId} not found`);
+      }
+
+      if (product.stock < quantity) {
+        throw new ErrorHandler(400, `Stock not enough for product ${productId}`);
+      }
+
+      return product;
+    } catch (error) {
+      throw error;
+    };
+  };
+
   private static get activeDiscount() {
     const now = new Date();
 
@@ -71,10 +114,12 @@ export class ProductRepository {
 
   static async findProductById(productId: number) {
     try {
-      const now = new Date();
       const product = await prisma.product.findFirst({
         where: { id: productId },
-        include: this.activeDiscount
+        include: {
+          category: true,
+          ...this.activeDiscount
+        }
       });
       return product;
     } catch (error) {
@@ -86,7 +131,10 @@ export class ProductRepository {
     try {
       const products = await prisma.product.findMany({
         where: { id: { in: productIds } },
-        include: this.activeDiscount
+        include: {
+          ...this.activeDiscount,
+          category: true
+        }
       });
       return products;
     } catch (error) {
@@ -100,7 +148,10 @@ export class ProductRepository {
         orderBy: {
           createdAt: "desc"
         },
-        include: this.activeDiscount
+        include: {
+          ...this.activeDiscount,
+          category: true,
+        },
       });
       return products;
     } catch (error) {

@@ -5,8 +5,8 @@ export interface Discount {
   description: string,
   type: DiscountType,
   value: number,
-  startDate?: Date,
-  endDate?: Date,
+  startDate?: Date | null,
+  endDate?: Date | null,
   isActive: boolean
 }
 
@@ -15,8 +15,8 @@ export interface DiscountCreateRequest {
   description: string,
   type: DiscountType,
   value: number,
-  startDate?: Date,
-  endDate?: Date,
+  startDate?: Date | null,
+  endDate?: Date | null,
   isActive: boolean
 }
 
@@ -25,7 +25,7 @@ export interface DiscountUpdateRequest {
   description: string,
   type: DiscountType,
   value: number,
-  startDate?: Date,
-  endDate?: Date,
+  startDate?: Date | null,
+  endDate?: Date | null,
   isActive: boolean
 }

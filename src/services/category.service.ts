@@ -15,7 +15,7 @@ export class CategoryService {
       };
 
       if (!categoryData.name || categoryData.name.trim() === "") {
-        throw new ErrorHandler(404, "Category name cannot be empty");
+        throw new ErrorHandler(400, "Category name cannot be empty");
       };
 
       const category = await CategoryRepository.create(categoryData);
