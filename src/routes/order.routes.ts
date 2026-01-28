@@ -4,6 +4,7 @@ import { OrderController } from "../controllers/order.controller";
 
 const router = Router();
 
+router.get("/", AuthMiddleware.authenticateToken, OrderController.getOrders);
 router.post(
   "/",
   AuthMiddleware.authenticateToken,

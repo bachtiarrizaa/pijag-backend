@@ -13,6 +13,29 @@ import { OrderItemRequest } from "../types/order-item.";
 import { CustomerRepository } from "../repositories/customer.repository";
 
 export class OrderService {
+  static async getOrders(user: any) {
+    try {
+      const userId = user.id;
+
+      if (user.roleName === "customer") {
+        const customer = await CustomerRepository.findByUserId(userId);
+        if (!customer) {
+          throw new ErrorHandler(404, "Customer not found");
+        }
+
+        return await OrderRepository.findOrdersByCustomer(customer.id);
+      }
+
+      if (user.roleName === "admin" || user.roleName === "cashier") {
+        return await OrderRepository.findOrders();
+      }
+
+      throw new ErrorHandler(403, "Forbidden");
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async create(cashierId: number | null, payload: CreateOrderRequest) {
     try {
       const source = cashierId ? OrderSource.cashier : OrderSource.customer;

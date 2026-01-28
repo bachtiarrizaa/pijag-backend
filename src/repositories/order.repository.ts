@@ -22,6 +22,47 @@ export class OrderRepository {
     };
   };
 
+  static async findOrdersByCustomer(customerId: number) {
+    try {
+      const orders = await prisma.order.findMany({
+        where: { customerId },
+        orderBy: {
+          createdAt: "desc"
+        },
+        include: {
+          orderItems: {
+            include: {
+              product: true
+            }
+          }
+        }
+      });
+      return orders;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async findOrders() {
+    try {
+      const orders = await prisma.order.findMany({
+        orderBy: {
+          createdAt: "desc"
+        },
+        include: {
+          orderItems: {
+            include: {
+              product: true
+            }
+          }
+        }
+      });
+      return orders;
+    } catch (error) {
+      throw error;
+    };
+  };
+
   static async create(
     payload: CreateOrderRequest,
     tx: Prisma.TransactionClient

@@ -5,6 +5,29 @@ import { ErrorHandler } from "../utils/error.utils";
 import { CustomerService } from "../services/customer.service";
 
 export class WishlistController {
+  static async getWishlists(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = Number(req.user?.id);
+      if (!userId) {
+        throw new ErrorHandler(401, "Unauthorized")
+      };
+
+      const customer = await CustomerService.getCustomerById(userId);
+      if (!customer) {
+        throw new ErrorHandler(404, "Customer not found!")
+      }
+
+      const wishlists = await WishlistService.getWishlists(customer.id);
+      res.status(200).json({
+        success: true,
+        message: "Fetched all wishlist successfully",
+        data: wishlists
+      });
+    } catch (error) {
+      next(error)
+    };
+  };
+
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = Number(req.user?.id);
@@ -26,29 +49,6 @@ export class WishlistController {
       });
     } catch (error) {
       next(error);
-    };
-  };
-
-  static async getWishlists(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = Number(req.user?.id);
-      if (!userId) {
-        throw new ErrorHandler(401, "Unauthorized")
-      };
-
-      const customer = await CustomerService.getCustomerById(userId);
-      if (!customer) {
-        throw new ErrorHandler(404, "Customer not found!")
-      }
-
-      const wishlists = await WishlistService.getWishlists(customer.id);
-      res.status(200).json({
-        success: true,
-        message: "Fetched all wishlist successfully",
-        data: wishlists
-      });
-    } catch (error) {
-      next(error)
     };
   };
 
