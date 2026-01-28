@@ -1,5 +1,4 @@
 import { Decimal } from "@prisma/client/runtime/library";
-import prisma from "../config/prisma.config";
 import { CategoryRepository } from "../repositories/category.repository";
 import { ProductRepository } from "../repositories/product.repository";
 import { Product, ProductCreateRequest, ProductUpdateRequest } from "../types/product";

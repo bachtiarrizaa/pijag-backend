@@ -23,7 +23,7 @@ export class AuthController {
       const payload = req.body as LoginRequest;
 
       const login = await AuthService.login(payload);
-      res.status(201).json({
+      res.status(200).json({
         success: true,
         message: "Login successfully",
         data: login,
@@ -39,7 +39,7 @@ export class AuthController {
       const token = authHeader && authHeader.split(" ")[1];
 
       if (!token) {
-        return res.status(401).json({
+        return res.status(400).json({
           success: false,
           message: "Token is required for logout",
         });
