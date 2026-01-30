@@ -1,7 +1,7 @@
 import { OrderSource, Prisma } from "@prisma/client";
 import prisma from "../config/prisma.config";
 import dayjs from "dayjs";
-import { CreateOrderRequest } from "../types/order";
+import { CreateOrderRequest, UpdateStatusOrderRequest } from "../types/order";
 
 export class OrderRepository {
   static async findLastOrderBySource( date: string, source: OrderSource ) {
@@ -63,6 +63,17 @@ export class OrderRepository {
     };
   };
 
+  static async findOrderById(orderId: number) {
+    try {
+      const order = await prisma.order.findFirst({
+        where: { id: orderId },
+      });
+      return order;
+    } catch (error) {
+      throw error;
+    };
+  };
+
   static async create(
     payload: CreateOrderRequest,
     tx: Prisma.TransactionClient
@@ -76,6 +87,21 @@ export class OrderRepository {
           source: payload.source,
           total: payload.total,
           finalTotal: payload.finalTotal
+        }
+      });
+      return order;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async updateStatus(orderId: number, payload: UpdateStatusOrderRequest) {
+    try {
+      const order = await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: payload.status,
+          paymentStatus: payload.paymentStatus
         }
       });
       return order;

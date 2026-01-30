@@ -11,6 +11,7 @@ import shiftRoutes from "./shift.routes";
 import orderRoutes from "./order.routes";
 import wishlistRoutes from "./wishlist.routes";
 import voucherRoutes from "./voucher.routes";
+import paymentRoutes from "./payment.routes";
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use("/cashier", shiftRoutes)
 router.use("/order", orderRoutes);
 router.use("/wishlist", wishlistRoutes);
 router.use("/vouchers", voucherRoutes);
+router.use("/payments", paymentRoutes);
 
 export default router;

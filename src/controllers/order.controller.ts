@@ -20,8 +20,8 @@ export class OrderController {
       });
     } catch (error) {
       next(error);
-    }
-  }
+    };
+  };
 
   static async create(req: Request, res: Response, next: NextFunction) {
 		try {

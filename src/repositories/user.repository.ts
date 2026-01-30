@@ -10,7 +10,7 @@ export class UserRepository{
           username: payload.username,
           email: payload.email,
           password: hashedPassword,
-          roleId: 2
+          roleId: 3
         },
         include: {
           role: true
