@@ -49,7 +49,8 @@ export class ProductRepository {
 
   static async decrementStock(
     productId: number, quantity: number,
-    tx: Prisma.TransactionClient) {
+    tx: Prisma.TransactionClient
+  ) {
     try {
       const stock = await tx.product.update({
         where: { id: productId },
@@ -60,6 +61,25 @@ export class ProductRepository {
         }
       });
 
+      return stock;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async incrementStock(
+    productId: number, quantity: number,
+    tx: Prisma.TransactionClient
+  ) {
+    try {
+      const stock = await tx.product.update({
+        where: { id: productId },
+        data: {
+          stock: {
+            increment: quantity
+          }
+        }
+      });
       return stock;
     } catch (error) {
       throw error;

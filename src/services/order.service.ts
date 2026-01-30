@@ -11,6 +11,7 @@ import { ShiftRepository } from "../repositories/shift.repository";
 import { ErrorHandler } from "../utils/error.utils";
 import { OrderItemRequest } from "../types/order-item.";
 import { CustomerRepository } from "../repositories/customer.repository";
+import dayjs from "dayjs";
 
 export class OrderService {
   static async getOrders(user: any) {
@@ -112,7 +113,39 @@ export class OrderService {
       });
     } catch (error) {
       throw error;
-    }
-  }
+    };
+  };
+
+  static async autoCancelOrder() {
+    try {
+      const expiredTime = dayjs().subtract(5, "minute").toDate();
+
+      return await prisma.$transaction(async (tx) => {
+        const expiredOrders = await OrderRepository.findOrderPendingStatus(expiredTime, tx)
+
+        if (expiredOrders.length === 0) {
+          return {
+            canceledCount: 0,
+            message: "No expired orders found",
+          };
+        };
+
+        for (const order of expiredOrders) {
+          for (const item of order.orderItems) {
+            await ProductRepository.incrementStock(item.productId, item.quantity, tx)
+          }
+
+          await OrderRepository.cancelOrder(order.id, tx)
+        }
+
+        return {
+          canceledCount: expiredOrders.length,
+          message: "Expired orders successfully canceled",
+        };
+      })
+    } catch (error) {
+      throw error;
+    };
+  };
 }
 

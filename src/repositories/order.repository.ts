@@ -74,6 +74,24 @@ export class OrderRepository {
     };
   };
 
+  static async findOrderPendingStatus(expiredTime: Date, tx: Prisma.TransactionClient) {
+    try {
+      const order = await tx.order.findMany({
+        where: {
+          status: "pending",
+          paymentStatus: "pending",
+          createdAt: { lte: expiredTime }
+        },
+        include: {
+          orderItems: true
+        }
+      });
+      return order;
+    } catch (error) {
+      throw error;
+    };
+  };
+
   static async create(
     payload: CreateOrderRequest,
     tx: Prisma.TransactionClient
@@ -102,6 +120,21 @@ export class OrderRepository {
         data: {
           status: payload.status,
           paymentStatus: payload.paymentStatus
+        }
+      });
+      return order;
+    } catch (error) {
+      throw error;
+    };
+  };
+
+  static async cancelOrder(orderId: number, tx: Prisma.TransactionClient) {
+    try {
+      const order = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: "canceled",
+          paymentStatus: "failed"
         }
       });
       return order;
