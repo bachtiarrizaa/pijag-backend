@@ -1,0 +1,32 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: pijag-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: obek
+      MYSQL_DATABASE: pijag
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: pijag-backend
+    command: npm run dev
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:          # <<< ini baru
+      - .:/app       # mount folder host ke container
+      - /app/node_modules  # biar node_modules container tetap dipakai
+
+volumes:
+  mysql_data:
