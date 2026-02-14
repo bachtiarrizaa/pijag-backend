@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { CreateOrderRequest, UpdateStatusOrderRequest } from "../types/order";
 
 export class OrderRepository {
-  static async findLastOrderBySource( date: string, source: OrderSource ) {
+  static async findLastOrderBySource(date: string, source: OrderSource) {
     try {
       const lastOrderCode = await prisma.order.findFirst({
         where: {
@@ -21,28 +21,6 @@ export class OrderRepository {
       throw error;
     };
   };
-
-  // static async findOrdersByCustomer(customerId: number) {
-  //   try {
-  //     const orders = await prisma.order.findMany({
-  //       where: { customerId },
-  //       orderBy: {
-  //         createdAt: "desc"
-  //       },
-  //       include: {
-  //         orderItems: {
-  //           include: {
-  //             product: true
-  //           }
-  //         }
-  //       }
-  //     });
-  //     return orders;
-  //   } catch (error) {
-  //     throw error;
-  //   };
-  // };
-
 
   static async findOrdersByCustomer(customerId: number, skip: number, take: number) {
     return prisma.order.findMany({
@@ -119,7 +97,8 @@ export class OrderRepository {
           orderCode: payload.orderCode,
           source: payload.source,
           total: payload.total,
-          finalTotal: payload.finalTotal
+          finalTotal: payload.finalTotal,
+          voucherId: payload.voucherId ?? null
         }
       });
       return order;

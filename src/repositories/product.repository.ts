@@ -17,7 +17,7 @@ export class ProductRepository {
 
   static async findDuplicateProduct(productId: number, name: string){
     try {
-      const product = await prisma.role.findFirst({
+      const product = await prisma.product.findFirst({
         where: {
           name,
           NOT: { id: productId }

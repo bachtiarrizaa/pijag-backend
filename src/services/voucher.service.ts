@@ -3,12 +3,13 @@ import { PaginationQuery } from "../types/pagination";
 import { Voucher, VoucherCreateRequest, VoucherUpdateRequest } from "../types/voucher";
 import { ErrorHandler } from "../utils/error.utils";
 import { PaginateUtils } from "../utils/pagination.utils";
+import { DiscountType } from "@prisma/client";
 
 export class VoucherService {
   static async getVouchers(query: PaginationQuery) {
     try {
       const { page, limit, offset } = PaginateUtils.paginate(query);
-      
+
       const [vouchers, totalItems] = await Promise.all([
         VoucherRepository.findVouchers(offset, limit),
         VoucherRepository.count()
@@ -34,7 +35,7 @@ export class VoucherService {
         throw new ErrorHandler(404, "Voucher not found");
       };
       return voucher;
-    } catch(error) {
+    } catch (error) {
       throw error;
     };
   };
@@ -56,7 +57,7 @@ export class VoucherService {
         throw new ErrorHandler(400, "Name cannot be empty");
       };
 
-      if (!["percent", "fixed"].includes(voucherData.type)) {
+      if (![DiscountType.percent, DiscountType.fixed].includes(voucherData.type)) {
         throw new ErrorHandler(400, "Invalid discount type");
       };
 
@@ -64,7 +65,7 @@ export class VoucherService {
         throw new ErrorHandler(400, "Discount value must be greater than 0");
       };
 
-      if (voucherData.type === "percent" && voucherData.value > 100) {
+      if (voucherData.type === DiscountType.percent && voucherData.value > 100) {
         throw new ErrorHandler(400, "Percent discount cannot exceed 100%");
       };
 
@@ -105,7 +106,7 @@ export class VoucherService {
         }
       };
 
-      if (!["percent", "fixed"].includes(voucherData.type)) {
+      if (![DiscountType.percent, DiscountType.fixed].includes(voucherData.type)) {
         throw new ErrorHandler(400, "Invalid discount type");
       };
 
@@ -113,7 +114,7 @@ export class VoucherService {
         throw new ErrorHandler(400, "Discount value must be greater than 0");
       };
 
-      if (voucherData.type === "percent" && voucherData.value > 100) {
+      if (voucherData.type === DiscountType.percent && voucherData.value > 100) {
         throw new ErrorHandler(400, "Percent discount cannot exceed 100%");
       };
 
@@ -155,6 +156,7 @@ export class VoucherService {
       };
 
       const voucher = await VoucherRepository.delete(voucherId);
+      return voucher;
     } catch (error) {
       throw error;
     };

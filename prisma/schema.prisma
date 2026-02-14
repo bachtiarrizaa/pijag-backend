@@ -280,7 +280,7 @@ model Shift {
 
 model Transaction {
   id          Int             @id @default(autoincrement())
-  shiftId     Int             @map("shift_id")
+  shiftId     Int?            @map("shift_id")
   orderId     Int             @map("order_id")
   paymentId   Int             @map("payment_id")
   type        TransactionType
@@ -289,7 +289,7 @@ model Transaction {
   createdAt   DateTime        @default(now()) @map("created_at")
   updatedAt   DateTime        @updatedAt @map("updated_at")
 
-  shift       Shift           @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  shift       Shift?          @relation(fields: [shiftId], references: [id], onDelete: Cascade)
   order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   payment     Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 

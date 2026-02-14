@@ -1,4 +1,5 @@
 import { Decimal } from "@prisma/client/runtime/library";
+import { DiscountType } from "@prisma/client";
 
 export class DiscountUtils {
   static calculateDiscount(product: any) {
@@ -8,13 +9,13 @@ export class DiscountUtils {
     const activeDiscount = product.discounts?.[0]?.discount;
 
     if (activeDiscount) {
-      if (activeDiscount.type === "percent") {
+      if (activeDiscount.type === DiscountType.percent) {
         finalPrice = finalPrice
           .mul(new Decimal(100).minus(activeDiscount.value))
           .div(100);
       }
 
-      if (activeDiscount.type === "fixed") {
+      if (activeDiscount.type === DiscountType.fixed) {
         finalPrice = finalPrice.minus(activeDiscount.value);
       }
 
