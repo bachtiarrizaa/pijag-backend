@@ -162,9 +162,11 @@ export class ProductRepository {
     };
   };
 
-  static async findProducts() {
+  static async findProducts(skip: number, take: number) {
     try {
       const products = await prisma.product.findMany({
+        skip,
+        take,
         orderBy: {
           createdAt: "desc"
         },
@@ -178,6 +180,11 @@ export class ProductRepository {
       throw error;
     };
   };
+
+  static async count() {
+    const countProducts = await prisma.product.count();
+    return countProducts;
+  }
 
   static async update(productId: number, payload: ProductUpdateRequest) {
     try {

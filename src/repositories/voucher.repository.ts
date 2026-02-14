@@ -2,9 +2,11 @@ import prisma from "../config/prisma.config";
 import { VoucherCreateRequest, VoucherUpdateRequest } from "../types/voucher";
 
 export class VoucherRepository {
-  static async findVouchers() {
+  static async findVouchers(skip: number, take: number) {
     try {
       const vouchers = await prisma.voucher.findMany({
+        skip,
+        take,
         orderBy: {
           createdAt: "desc"
         }
@@ -14,6 +16,15 @@ export class VoucherRepository {
       throw error;
     };
   };
+
+  static async count() {
+    try {
+      const countVouchers = await prisma.voucher.count();
+      return countVouchers;
+    } catch (error) {
+      throw error;
+    };
+  }
 
   static async findVoucherById(voucherId: number) {
     try {

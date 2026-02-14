@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { CategoryCreateRequest, CategoryUpdateRequest } from "../types/category";
 import { CategoryService } from "../services/category.service";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class CategoryController {
   static async create(req: Request, res: Response, next: NextFunction) {
@@ -20,11 +21,13 @@ export class CategoryController {
 
   static async getCategories(req: Request, res: Response, next: NextFunction) {
     try {
-      const categories = await CategoryService.getCategories();
+      const paginationQuery = PaginateUtils.parse(req.query);
+      const { categories, meta } = await CategoryService.getCategories(paginationQuery);
       res.status(200).json({
         success: true,
         message: "Categories fetched successfully",
-        data: categories
+        data: categories,
+        meta
       });
     } catch (error) {
       next(error);

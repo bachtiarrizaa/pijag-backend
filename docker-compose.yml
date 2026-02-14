@@ -24,9 +24,9 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    volumes:          # <<< ini baru
-      - .:/app       # mount folder host ke container
-      - /app/node_modules  # biar node_modules container tetap dipakai
+    volumes:
+      - .:/app
+      - /app/node_modules
 
 volumes:
   mysql_data:

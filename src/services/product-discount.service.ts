@@ -1,14 +1,29 @@
 import { DiscountRepository } from "../repositories/discount.repository";
 import { ProductDiscountRepository } from "../repositories/product-discount.repository";
 import { ProductRepository } from "../repositories/product.repository";
+import { PaginationQuery } from "../types/pagination";
 import { ProductDiscount, ProductDiscountCreateRequest, ProductDiscountUpdateRequest } from "../types/product-discount";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class ProductDiscountService {
-  static async getProductDiscount() {
+  static async getProductDiscount(query: PaginationQuery) {
     try {
-      const productDiscounts = await ProductDiscountRepository.findProductDiscounts();
-      return productDiscounts;
+      const { page, limit, offset } = PaginateUtils.paginate(query);
+      
+      const [productsDiscounts, totalItems] = await Promise.all([
+        ProductDiscountRepository.findProductDiscounts(offset, limit),
+        ProductDiscountRepository.count()
+      ]);
+
+      const meta = PaginateUtils.buildMeta({
+        totalItems,
+        currentPage: page,
+        itemsPerPage: limit,
+        itemCount: productsDiscounts.length,
+      });
+
+      return { productsDiscounts, meta };
     } catch (error) {
       throw error;
     }

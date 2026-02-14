@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { ProductCreateRequest, ProductUpdateRequest } from "../types/product";
 import { ProductService } from "../services/product.service";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class ProductController {
   static async create(req: Request, res: Response, next: NextFunction) {
@@ -25,11 +26,14 @@ export class ProductController {
 
   static async getProducts(req: Request, res: Response, next: NextFunction) {
     try {
-      const products = await ProductService.getProducts();
+      const paginationQuery = PaginateUtils.parse(req.query);
+
+      const { productDiscounts, meta } = await ProductService.getProducts(paginationQuery);
       res.status(200).json({
         success: true,
         message: "Fetched all products successfully",
-        data: products
+        data: productDiscounts,
+        meta
       });
     } catch (error) {
       next(error);

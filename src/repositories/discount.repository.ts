@@ -21,20 +21,30 @@ export class DiscountRepository {
     };
   };
 
-  static async findDiscounts(type?: DiscountType) {
+  static async findDiscounts(skip: number, take: number, type?: DiscountType) {
     try {
       const discounts = await prisma.discount.findMany({
+        skip,
+        take,
         where: type ? { type } : {},
-        orderBy: {
-          createdAt: "desc"
-        }
+        orderBy: { createdAt: "desc" }
       });
       return discounts;
     } catch (error) {
       throw error;
-    };
-  };
+    }
+  }
 
+  static async count(type?: DiscountType) {
+    try {
+      const countDiscounts = await prisma.discount.count({
+        where: type ? { type } : {}
+      });
+      return countDiscounts;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   static async findDiscountById(discountId: number) {
     try {

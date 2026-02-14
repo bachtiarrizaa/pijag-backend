@@ -22,46 +22,61 @@ export class OrderRepository {
     };
   };
 
-  static async findOrdersByCustomer(customerId: number) {
-    try {
-      const orders = await prisma.order.findMany({
-        where: { customerId },
-        orderBy: {
-          createdAt: "desc"
-        },
-        include: {
-          orderItems: {
-            include: {
-              product: true
-            }
-          }
-        }
-      });
-      return orders;
-    } catch (error) {
-      throw error;
-    };
-  };
+  // static async findOrdersByCustomer(customerId: number) {
+  //   try {
+  //     const orders = await prisma.order.findMany({
+  //       where: { customerId },
+  //       orderBy: {
+  //         createdAt: "desc"
+  //       },
+  //       include: {
+  //         orderItems: {
+  //           include: {
+  //             product: true
+  //           }
+  //         }
+  //       }
+  //     });
+  //     return orders;
+  //   } catch (error) {
+  //     throw error;
+  //   };
+  // };
 
-  static async findOrders() {
-    try {
-      const orders = await prisma.order.findMany({
-        orderBy: {
-          createdAt: "desc"
-        },
-        include: {
-          orderItems: {
-            include: {
-              product: true
-            }
-          }
+
+  static async findOrdersByCustomer(customerId: number, skip: number, take: number) {
+    return prisma.order.findMany({
+      where: { customerId },
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+      include: {
+        orderItems: {
+          include: { product: true }
         }
-      });
-      return orders;
-    } catch (error) {
-      throw error;
-    };
-  };
+      }
+    });
+  }
+
+  static async findOrders(skip: number, take: number) {
+    return prisma.order.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+      include: {
+        orderItems: {
+          include: { product: true }
+        }
+      }
+    });
+  }
+
+  static async count(customerId?: number) {
+    return prisma.order.count({
+      where: customerId ? { customerId } : {}
+    });
+  }
+
 
   static async findOrderById(orderId: number) {
     try {

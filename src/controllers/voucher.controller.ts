@@ -2,15 +2,19 @@ import { NextFunction, Request, Response } from "express";
 import { VoucherCreateRequest, VoucherUpdateRequest } from "../types/voucher";
 import { VoucherService } from "../services/voucher.service";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class VoucherController {
   static async getVouchers(req: Request, res: Response, next: NextFunction) {
     try {
-      const vouchers = await VoucherService.getVouchers();
+      const paginationQuery = PaginateUtils.parse(req.query);
+      const { vouchers, meta } = await VoucherService.getVouchers(paginationQuery);
+      
       res.status(200).json({
         success: true,
         message: "Fetched all vouchers successfully",
-        data: vouchers
+        data: vouchers,
+        meta
       });
     } catch (error) {
       next(error);

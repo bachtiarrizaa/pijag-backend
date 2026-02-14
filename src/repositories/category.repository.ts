@@ -26,9 +26,11 @@ export class CategoryRepository {
     };
   };
 
-  static async findCategories() {
+  static async findCategories(skip: number, take: number) {
     try {
       const categories = await prisma.category.findMany({
+        skip,
+        take,
         orderBy: {
           createdAt: "desc"
         },
@@ -38,6 +40,15 @@ export class CategoryRepository {
       throw error;
     };
   };
+
+  static async count() {
+    try {
+      const countCategories = await prisma.category.count();
+      return countCategories;
+    } catch (error) {
+      throw error;
+    };
+  }
 
   static async findCategoryById(categoryId: number) {
     try {

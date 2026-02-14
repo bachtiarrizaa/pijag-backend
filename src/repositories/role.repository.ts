@@ -1,5 +1,5 @@
 import prisma from "../config/prisma.config";
-import { Role, RoleCreateRequest, RoleUpdateRequest } from "../types/role";
+import { RoleCreateRequest, RoleUpdateRequest } from "../types/role";
 
 export class RoleRepository{
   static async create(payload: RoleCreateRequest) {
@@ -16,18 +16,30 @@ export class RoleRepository{
     };
   };
 
-  static async findRoles(){
+  static async findRoles(skip: number, take: number) {
     try {
       const roles = await prisma.role.findMany({
+        skip,
+        take,
         orderBy: {
           createdAt: "desc"
         }
       });
-      return roles;
+      return roles
+    } catch (error) {
+      throw error;
+    } 
+  }
+
+  static async count() {
+    try {
+      const countRoles = await prisma.role.count();
+      return countRoles;
     } catch (error) {
       throw error;
     }
-  };
+  }
+
 
   static async findRoleById(roleId: number){
     try {

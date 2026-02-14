@@ -17,10 +17,14 @@ export class ProductDiscountRepository {
     };
   };
 
-  static async findProductDiscounts() {
+  static async findProductDiscounts(skip: number, take: number) {
     try {
       const productDiscounts = await prisma.productDiscount.findMany({
-        orderBy: { id: "desc" },
+        skip,
+        take,
+        orderBy: {
+          createdAt: "desc"
+        },
         // include: {
         //   product: true,
         //   discount: true
@@ -31,6 +35,15 @@ export class ProductDiscountRepository {
       throw error;
     };
   };
+
+  static async count() {
+    try {
+      const countProductDiscounts = await prisma.productDiscount.count();
+      return countProductDiscounts;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   static async findProductDiscountById(productDiscountId: number) {
     try {

@@ -12,29 +12,40 @@ import { ErrorHandler } from "../utils/error.utils";
 import { OrderItemRequest } from "../types/order-item.";
 import { CustomerRepository } from "../repositories/customer.repository";
 import dayjs from "dayjs";
+import { PaginateUtils } from "../utils/pagination.utils";
+import { PaginationQuery } from "../types/pagination";
 
 export class OrderService {
-  static async getOrders(user: any) {
-    try {
-      const userId = user.id;
+  static async getOrders(user: any, query: PaginationQuery) {
+    const { page, limit, offset } = PaginateUtils.paginate(query);
 
-      if (user.roleName === "customer") {
-        const customer = await CustomerRepository.findByUserId(userId);
-        if (!customer) {
-          throw new ErrorHandler(404, "Customer not found");
-        }
+    let orders, totalItems;
 
-        return await OrderRepository.findOrdersByCustomer(customer.id);
-      }
+    if (user.roleName === "customer") {
+      const customer = await CustomerRepository.findByUserId(user.id);
+      if (!customer) throw new ErrorHandler(404, "Customer not found");
 
-      if (user.roleName === "admin" || user.roleName === "cashier") {
-        return await OrderRepository.findOrders();
-      }
-
+      [orders, totalItems] = await Promise.all([
+        OrderRepository.findOrdersByCustomer(customer.id, offset, limit),
+        OrderRepository.count(customer.id)
+      ]);
+    } else if (user.roleName === "admin" || user.roleName === "cashier") {
+      [orders, totalItems] = await Promise.all([
+        OrderRepository.findOrders(offset, limit),
+        OrderRepository.count()
+      ]);
+    } else {
       throw new ErrorHandler(403, "Forbidden");
-    } catch (error) {
-      throw error;
     }
+
+    const meta = PaginateUtils.buildMeta({
+      totalItems,
+      currentPage: page,
+      itemsPerPage: limit,
+      itemCount: orders.length
+    });
+
+    return { orders, meta };
   }
 
   static async create(cashierId: number | null, payload: CreateOrderRequest) {

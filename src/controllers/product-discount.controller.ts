@@ -2,15 +2,18 @@ import { NextFunction, Request, Response } from "express";
 import { ProductDiscountCreateRequest, ProductDiscountUpdateRequest } from "../types/product-discount";
 import { ProductDiscountService } from "../services/product-discount.service";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class ProductDiscountController {
   static async getProductDiscounts(req: Request, res: Response, next: NextFunction) {
     try {
-      const productDiscounts = await ProductDiscountService.getProductDiscount();
+      const paginationQuery = PaginateUtils.parse(req.query);
+      const { productsDiscounts, meta } = await ProductDiscountService.getProductDiscount(paginationQuery);
       res.status(200).json({
         success: true,
         message: "Product discounts fetched successfully",
-        data: productDiscounts
+        data: productsDiscounts,
+        meta
       });
     } catch (error) {
       next(error);

@@ -1,12 +1,27 @@
 import { VoucherRepository } from "../repositories/voucher.repository";
+import { PaginationQuery } from "../types/pagination";
 import { Voucher, VoucherCreateRequest, VoucherUpdateRequest } from "../types/voucher";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class VoucherService {
-  static async getVouchers() {
+  static async getVouchers(query: PaginationQuery) {
     try {
-      const vouchers = await VoucherRepository.findVouchers();
-      return vouchers;
+      const { page, limit, offset } = PaginateUtils.paginate(query);
+      
+      const [vouchers, totalItems] = await Promise.all([
+        VoucherRepository.findVouchers(offset, limit),
+        VoucherRepository.count()
+      ]);
+
+      const meta = PaginateUtils.buildMeta({
+        totalItems,
+        currentPage: page,
+        itemsPerPage: limit,
+        itemCount: vouchers.length,
+      });
+
+      return { vouchers, meta };
     } catch (error) {
       throw error;
     };

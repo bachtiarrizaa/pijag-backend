@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { DiscountCreateRequest, DiscountType, DiscountUpdateRequest } from "../types/discount";
 import { DiscountService } from "../services/discount.service";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class DiscountController {
   static async create(req: Request, res: Response, next: NextFunction) {
@@ -20,17 +21,21 @@ export class DiscountController {
 
   static async getDiscounts(req: Request, res: Response, next: NextFunction) {
     try {
+      const paginationQuery = PaginateUtils.parse(req.query);
       const type = req.query.type as DiscountType | undefined;
-      const discounts = await DiscountService.getDiscounts(type);
+
+      const { discounts, meta } = await DiscountService.getDiscounts(paginationQuery, type);
+
       res.status(200).json({
         success: true,
         message: type ? `Discounts with type ${type} fetched` : "All discounts fetched",
-        data: discounts
+        data: discounts,
+        meta
       });
     } catch (error) {
       next(error);
-    };
-  };
+    }
+  }
 
   static async update(req: Request, res: Response, next: NextFunction) {
     try {

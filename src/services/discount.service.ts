@@ -1,5 +1,7 @@
 import { DiscountRepository } from "../repositories/discount.repository";
 import { Discount, DiscountCreateRequest, DiscountType, DiscountUpdateRequest } from "../types/discount";
+import { PaginationQuery } from "../types/pagination";
+import { PaginateUtils } from "../utils/pagination.utils";
 import { ErrorHandler } from "../utils/error.utils";
 
 export class DiscountService {
@@ -43,18 +45,34 @@ export class DiscountService {
     };
   };
 
-  static async getDiscounts(type?: DiscountType) {
+  static async getDiscounts(query: PaginationQuery, type?: DiscountType) {
     try {
       if (type && !["percent", "fixed"].includes(type)) {
-        throw new ErrorHandler(400, "Invalid discount type query");
+        throw new Error("Invalid discount type query");
       }
 
-      const discounts = await DiscountRepository.findDiscounts(type);
-      return discounts;
+      const { page, limit, offset } = PaginateUtils.paginate(query);
+
+      const [discounts, totalItems] = await Promise.all([
+        DiscountRepository.findDiscounts(offset, limit, type),
+        DiscountRepository.count(type)
+      ]);
+
+      const meta = PaginateUtils.buildMeta({
+        totalItems,
+        itemCount: discounts.length,
+        itemsPerPage: limit,
+        currentPage: page
+      });
+
+      return {
+        discounts,
+        meta
+      };
     } catch (error) {
       throw error;
-    };
-  };
+    }
+  }
 
 
   static async update(discountId: number, payload: DiscountUpdateRequest) {

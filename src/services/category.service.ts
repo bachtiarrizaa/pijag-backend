@@ -1,6 +1,8 @@
 import { CategoryRepository } from "../repositories/category.repository";
 import { Category, CategoryCreateRequest, CategoryUpdateRequest } from "../types/category";
+import { PaginationQuery } from "../types/pagination";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class CategoryService {
   static async create(payload: CategoryCreateRequest) {
@@ -25,10 +27,18 @@ export class CategoryService {
     };
   };
 
-  static async getCategories() {
+  static async getCategories(query: PaginationQuery) {
     try {
-      const categories = await CategoryRepository.findCategories();
-      return categories;
+      const { page, limit, offset } = PaginateUtils.paginate(query);
+      const categories = await CategoryRepository.findCategories(offset, limit);
+      const totalItems = await CategoryRepository.count();
+      const meta = PaginateUtils.buildMeta({
+        totalItems,
+        currentPage: page,
+        itemsPerPage: limit,
+        itemCount: categories.length
+      });
+      return { categories, meta };
     } catch (error) {
       throw error;
     };

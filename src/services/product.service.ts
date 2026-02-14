@@ -4,6 +4,8 @@ import { ProductRepository } from "../repositories/product.repository";
 import { Product, ProductCreateRequest, ProductUpdateRequest } from "../types/product";
 import { DiscountUtils } from "../utils/discount.utils";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginationQuery } from "../types/pagination";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class ProductService{
   static async create(payload: ProductCreateRequest) {
@@ -50,9 +52,10 @@ export class ProductService{
     };
   };
 
-  static async getProducts() {
+  static async getProducts(query: PaginationQuery) {
     try {
-      const products = await ProductRepository.findProducts();
+      const { page, limit, offset } = PaginateUtils.paginate(query);
+      const products = await ProductRepository.findProducts(offset, limit);
 
       const productDiscounts = await Promise.all(
         products.map(product =>
@@ -60,7 +63,19 @@ export class ProductService{
         )
       );
 
-      return productDiscounts;
+      const totalItems = await ProductRepository.count();
+
+      const meta = PaginateUtils.buildMeta({
+        totalItems,
+        currentPage: page,
+        itemsPerPage: limit,
+        itemCount: products.length,
+      });
+
+      return {
+        productDiscounts,
+        meta
+      };
     } catch (error) {
       throw error;
     }

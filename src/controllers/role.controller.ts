@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { RoleCreateRequest, RoleUpdateRequest } from "../types/role";
 import { RoleService } from "../services/role.service";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class RoleController {
   static async create(req: Request, res: Response, next: NextFunction){
@@ -20,16 +21,21 @@ export class RoleController {
 
   static async getRoles(req: Request, res: Response, next: NextFunction) {
     try {
-      const roles = await RoleService.getRoles();
+      const paginationQuery = PaginateUtils.parse(req.query);
+
+      const { roles, meta } = await RoleService.getRoles(paginationQuery);
+
       res.status(200).json({
         success: true,
-        message: "Success fetch all roles",
-        data: roles
+        message: "Data fetched successfully",
+        data: roles,
+        meta
       });
     } catch (error) {
-      next (error);
-    };
-  };
+      next(error);
+    }
+  }
+
 
   static async update(req: Request, res: Response, next: NextFunction){
     try {

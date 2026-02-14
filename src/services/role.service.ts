@@ -1,6 +1,9 @@
+import prisma from "../config/prisma.config";
 import { RoleRepository } from "../repositories/role.repository";
+import { PaginationQuery } from "../types/pagination";
 import { Role, RoleCreateRequest, RoleUpdateRequest } from "../types/role";
 import { ErrorHandler } from "../utils/error.utils";
+import { PaginateUtils } from "../utils/pagination.utils";
 
 export class RoleService{
   static async create(payload: RoleCreateRequest) {
@@ -21,14 +24,27 @@ export class RoleService{
     };
   };
 
-  static async getRoles() {
-    try {
-      const roles = await RoleRepository.findRoles();
-      return roles;
-    } catch (error) {
-      throw error;
+  static async getRoles(query: PaginationQuery) {
+    const { page, limit, offset } = PaginateUtils.paginate(query);
+
+    const [roles, totalItems] = await Promise.all([
+      RoleRepository.findRoles(offset, limit),
+      RoleRepository.count()
+    ]);
+
+    const meta = PaginateUtils.buildMeta({
+      totalItems,
+      currentPage: page,
+      itemsPerPage: limit,
+      itemCount: roles.length,
+    });
+
+
+    return {
+      roles,
+      meta
     };
-  };
+  }
 
   static async update(roleId: number, payload: RoleUpdateRequest) {
     try {
