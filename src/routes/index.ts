@@ -12,6 +12,7 @@ import orderRoutes from "./order.routes";
 import wishlistRoutes from "./wishlist.routes";
 import voucherRoutes from "./voucher.routes";
 import paymentRoutes from "./payment.routes";
+import reviewRoutes from "./review.route";
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use("/order", orderRoutes);
 router.use("/wishlist", wishlistRoutes);
 router.use("/vouchers", voucherRoutes);
 router.use("/payments", paymentRoutes);
+router.use("/reviews", reviewRoutes);
 
 export default router;
