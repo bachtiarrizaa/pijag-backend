@@ -3,6 +3,8 @@ import { OrderRepository } from "../repositories/order.repository";
 import { PaymentRepository } from "../repositories/payment.repository";
 import { PaymentCreateRequest } from "../types/payment";
 import { ErrorHandler } from "../utils/error.utils";
+import { TransactionRepository } from "../repositories/transaction.repository";
+import { ShiftRepository } from "../repositories/shift.repository";
 
 export class PaymentService {
   static async create(user: any, payload: PaymentCreateRequest) {
@@ -41,10 +43,31 @@ export class PaymentService {
       paymentStatus: "paid",
     });
 
+    let transaction = null;
+    let activeShiftId = null;
+
+    if (order.cashierId) {
+      const activeShift = await ShiftRepository.findOpenShift(order.cashierId);
+      if (activeShift) {
+        activeShiftId = activeShift.id;
+      }
+    }
+
+    transaction = await TransactionRepository.create({
+      shiftId: activeShiftId,
+      orderId: order.id,
+      paymentId: payment.id,
+      type: "income",
+      amount: orderTotal,
+      description: `Payment for order ${order.orderCode} (${order.source})`
+    });
+
     return {
       ...payment,
       orderId: order.id,
       paidAmount,
+      change,
+      transaction,
     };
   }
 }

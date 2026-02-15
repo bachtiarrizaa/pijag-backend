@@ -58,7 +58,7 @@ export class OrderService {
           throw new ErrorHandler(403, "Cashier has no active shift");
         }
       }
-      
+
       if (source === OrderSource.customer && !payload.customerId) {
         throw new ErrorHandler(400, "customerId is required for customer order");
       }
@@ -104,13 +104,56 @@ export class OrderService {
           await ProductRepository.decrementStock(product.id, item.quantity, tx);
         }
 
+        let finalTotal = total;
+        let voucherId = null;
+
+        if (payload.voucherId) {
+          const voucher = await prisma.voucher.findUnique({
+            where: { id: payload.voucherId }
+          });
+
+          if (!voucher) {
+            throw new ErrorHandler(404, "Voucher not found");
+          }
+
+          if (!voucher.isActive) {
+            throw new ErrorHandler(400, "Voucher is not active");
+          }
+
+          const now = new Date();
+          if (voucher.startDate && now < voucher.startDate) {
+            throw new ErrorHandler(400, "Voucher is not yet active");
+          }
+          if (voucher.endDate && now > voucher.endDate) {
+            throw new ErrorHandler(400, "Voucher has expired");
+          }
+
+          if (voucher.minOrder && total.lessThan(voucher.minOrder)) {
+            throw new ErrorHandler(400, `Minimum order amount is ${voucher.minOrder}`);
+          }
+
+          if (voucher.type === "percent") {
+            const discount = total.mul(voucher.value).div(100);
+            finalTotal = total.minus(discount);
+          } else if (voucher.type === "fixed") {
+            finalTotal = total.minus(voucher.value);
+          }
+
+          if (finalTotal.lessThan(0)) {
+            finalTotal = new Decimal(0);
+          }
+
+          voucherId = voucher.id;
+        }
+
         const itemData = {
           customerId: payload.customerId ?? null,
           cashierId: cashierId ?? null,
           orderCode,
           source,
           total,
-          finalTotal: total,
+          finalTotal,
+          voucherId,
           items: validatedItems
         }
         const order = await OrderRepository.create(itemData, tx);
@@ -125,6 +168,67 @@ export class OrderService {
     } catch (error) {
       throw error;
     };
+  };
+
+  static async updateOrderStatus(orderId: number, status: string) {
+    const order = await OrderRepository.findOrderById(orderId);
+    if (!order) {
+      throw new ErrorHandler(404, "Order not found");
+    }
+
+    const validStatuses = ["pending", "processing", "ready", "completed", "canceled"];
+    if (!validStatuses.includes(status)) {
+      throw new ErrorHandler(400, "Invalid order status");
+    }
+
+    if (order.status === "canceled") {
+      throw new ErrorHandler(400, "Cannot update canceled order");
+    }
+
+    if (order.status === "completed") {
+      throw new ErrorHandler(400, "Cannot update completed order");
+    }
+
+    const updatedOrder = await OrderRepository.updateStatus(orderId, {
+      status: status as any,
+      paymentStatus: order.paymentStatus
+    });
+
+    return updatedOrder;
+  };
+
+  static async cancelOrder(orderId: number) {
+    const order = await OrderRepository.findOrderById(orderId);
+    if (!order) {
+      throw new ErrorHandler(404, "Order not found");
+    }
+
+    if (order.status === "canceled") {
+      throw new ErrorHandler(400, "Order already canceled");
+    }
+
+    if (order.status === "completed") {
+      throw new ErrorHandler(400, "Cannot cancel completed order");
+    }
+
+    return await prisma.$transaction(async (tx) => {
+      const orderWithItems = await tx.order.findUnique({
+        where: { id: orderId },
+        include: { orderItems: true }
+      });
+
+      if (!orderWithItems) {
+        throw new ErrorHandler(404, "Order not found");
+      }
+
+      for (const item of orderWithItems.orderItems) {
+        await ProductRepository.incrementStock(item.productId, item.quantity, tx);
+      }
+
+      const canceledOrder = await OrderRepository.cancelOrder(orderId, tx);
+
+      return canceledOrder;
+    });
   };
 
   static async autoCancelOrder() {

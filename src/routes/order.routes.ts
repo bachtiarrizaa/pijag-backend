@@ -11,5 +11,16 @@ router.post(
   AuthMiddleware.authorizeRole(["customer", "cashier"]),
   OrderController.create
 );
+router.patch(
+  "/:id/status",
+  AuthMiddleware.authenticateToken,
+  AuthMiddleware.authorizeRole(["admin", "cashier"]),
+  OrderController.updateOrderStatus
+);
+router.patch(
+  "/:id/cancel",
+  AuthMiddleware.authenticateToken,
+  OrderController.cancelOrder
+);
 
 export default router;

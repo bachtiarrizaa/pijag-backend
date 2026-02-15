@@ -9,6 +9,7 @@ export interface CreateOrderRequest {
   source: OrderSource,
   total: Decimal,
   finalTotal: Decimal,
+  voucherId?: number | null,
   items: OrderItemRequest[],
 }
 
